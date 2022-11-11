@@ -38,6 +38,10 @@ app.add_middleware(
 #-------------------------------------------#
 # authentication
 
+@app.get('/')
+async def get_dbs():
+    return {"hello":"world"}
+
 
 @app.get('/api/get-dbs')
 async def get_dbs():
