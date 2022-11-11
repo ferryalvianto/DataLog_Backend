@@ -39,7 +39,7 @@ app.add_middleware(
 # authentication
 
 @app.get('/')
-async def get_dbs():
+async def test():
     return {"hello":"world"}
 
 
