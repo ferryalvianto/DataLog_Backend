@@ -19,7 +19,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
-    'https://ferryalvianto.github.io'
+    'datalogwebapp.netlify.app'
     ]
 
 # what is a middleware?
