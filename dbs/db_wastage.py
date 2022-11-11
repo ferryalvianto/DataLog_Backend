@@ -1,6 +1,4 @@
-from typing import Collection
 import motor.motor_asyncio
-from models.model import Wastage
 
 
 client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')

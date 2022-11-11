@@ -1,4 +1,3 @@
-from typing import Collection
 import motor.motor_asyncio
 from models.model import ProductQuantityForecast
 

@@ -3,12 +3,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from fastapi.encoders import jsonable_encoder
 
-from models.model import DailyRevenueForecast, Wastage, Sentiments, ProductQuantityForecast, User, UserInDB, Token
+from models.model import Sentiments, User, UserInDB, Token
 from models.ml_model_regression import save_model_to_db, load_saved_model_from_db
 from authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db, client, pwd_context
 from api_weather import get_weather
 
-from dbs.db_forecast_productquantity import fetch_latest_forecast_quantity
 from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
 from dbs.db_revenue import fecth_by_range_revenue, fetch_all_revenue
 from dbs.db_sentiments import create_sentiments,fecth_by_range_sentiments,fetch_all_sentiments

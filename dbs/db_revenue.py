@@ -1,5 +1,3 @@
-from sqlite3 import Cursor
-from typing import Collection
 import motor.motor_asyncio
 from models.model import Revenue
 from models.model import RevenueMaxDate

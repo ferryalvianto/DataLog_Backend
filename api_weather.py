@@ -1,6 +1,4 @@
 import requests
-from tkinter import *
-import math
 from models.model import WeatherForecast
 
 def get_weather():
