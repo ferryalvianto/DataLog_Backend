@@ -1,5 +1,6 @@
 # Pydantic allows auto creation of JSON Schemas from models
 from sqlite3 import Date
+from datetime import date
 from pydantic import BaseModel
 from typing import Union
 
@@ -72,3 +73,10 @@ class ML_Model(BaseModel):
 class RevenueMaxDate(BaseModel):
     ymd: str
     revenue: int
+
+class General_Products(BaseModel):
+    Product_Category: str
+    Start_date: date
+    End_date: date
+    Product: str
+    Quantity_Sold: int

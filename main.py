@@ -12,6 +12,7 @@ from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
 from dbs.db_revenue import fecth_by_range_revenue, fetch_all_revenue
 from dbs.db_sentiments import create_sentiments,fecth_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
+from dbs.db_generalproducts import fetch_general_products
 
 # an HTTP-specific exception class  to generate exception information
 from fastapi.middleware.cors import CORSMiddleware
@@ -204,3 +205,10 @@ async def put_model():
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
+
+#-------------------------------------------#
+# General Products
+@app.get("/api/general_products")
+async def fetch_products(category: str, start_date: str, end_date: str):
+    response = await  fetch_general_products(category, start_date, end_date)
+    return response
