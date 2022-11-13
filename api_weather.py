@@ -47,6 +47,7 @@ def get_weather():
         response_raw["temp_max"] = int(round(temp_max, 0))
         response_raw["dt_txt"] = dt
 
+
         response_list.append(WeatherForecast(**response_raw))
 
         counter_start += 7
