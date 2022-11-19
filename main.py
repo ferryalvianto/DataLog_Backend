@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from fastapi.encoders import jsonable_encoder
 
+from models.clean_csv import cleancsv
 from models.model import Sentiments, User, UserInDB, Token
 from models.ml_model_regression import save_model_to_db, load_saved_model_from_db
 from authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db, client, pwd_context
@@ -204,3 +205,21 @@ async def put_model():
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
+
+
+@app.get("/api/clean_csv")
+async def clean_csv(db:str, id:str, name:str, date:str):
+    response = cleancsv(db, id, name, date)
+    if response:
+        return response
+    raise HTTPException(400, f"Something went wrong")
+
+
+# @app.get("/api/timeseries")
+# async def timeseries_model(db:str):
+#     response = save_model_to_db(db)
+#     if response:
+#         return response
+#     raise HTTPException(400, f"Something went wrong")
+
+
