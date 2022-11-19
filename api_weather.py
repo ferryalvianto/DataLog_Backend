@@ -43,7 +43,7 @@ def get_weather():
         for x in temp_array:
             temp_sum += x
         temp = temp_sum/8
-        response_raw["temp"] = int(round(temp, 0))
+        response_raw["temp_avg"] = int(round(temp, 0))
         response_raw["temp_min"] = int(round(temp_min, 0))
         response_raw["temp_max"] = int(round(temp_max, 0))
         response_raw["dt_txt"] = dt
