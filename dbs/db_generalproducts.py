@@ -1,4 +1,5 @@
 from sqlite3 import Cursor
+from datetime import datetime
 from typing import Collection
 import motor.motor_asyncio
 from models.model import General_Products
@@ -10,14 +11,14 @@ collection = database.Order_Item_Transaction
 async def fetch_general_products(category, start_date, end_date):
     products = []
 
-
     cursor = collection.aggregate([
         {
             "$match" : 
             {
                 "$and": [
                     {"Category" : category},
-                    {"Date": {"$gte" : start_date, '$lte': end_date}}
+                    {"Date_fmt": {"$gte" : datetime.fromisoformat(start_date), 
+                    '$lte': datetime.fromisoformat(end_date)}}
                 ]
             }
         },
