@@ -6,7 +6,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 import pickle
 import time
-import json
 
 def save_model_to_db():
 
@@ -154,52 +153,11 @@ def load_saved_model_from_db(weather_data):
     prediction['Date'] = df_orig.Year
 
         
-    
-   
-    # weather_data_df = pd.DataFrame(weather_data, columns=["temp", "temp_min", "temp_max", "dt_txt"])
-
-
-    # weather_data_df.temp = weather_data_df.temp.apply(lambda x: x[1])
-    # weather_data_df.temp_min = weather_data_df.temp_min.apply(lambda x: x[1])
-    # weather_data_df.temp_max = weather_data_df.temp_max.apply(lambda x: x[1])
-    # weather_data_df.dt_txt = weather_data_df.dt_txt.apply(lambda x: x[1])
-
-    # weather_data_df_orig = weather_data_df.copy()
-
-    # weather_data_df.rename(columns={"temp_max": "Max_Temp_C_", "temp_min":"Min_Temp_C_", "temp": "Temperature", "dt_txt": "Year"}, inplace=True)
-    # weather_data_df["Category_BOH"] =0
-    # weather_data_df["Category_Bakery"] =0
-    # weather_data_df["Category_Be Fresh Meals"] =0
-    # weather_data_df["Category_Be Fresh Products"] =0
-    # weather_data_df["Category_Beverages"] =0
-    # weather_data_df["Category_Coffee Bar"] =0
-    # weather_data_df["Category_Dairy"] =1
-    # weather_data_df["Category_Dairy - do not use"] =0
-    # weather_data_df["Category_Deli"] =0
-    # weather_data_df["Category_Fresh Prep"] =0
-    # weather_data_df["Category_Grocery"] =0
-    # weather_data_df["Category_Health & Beauty"] =0
-    # weather_data_df["Category_Health & Home"] =0
-    # weather_data_df["Category_Heat & Eat"] =0
-    # weather_data_df["Category_Meat & Seafood"] =0
-    # weather_data_df["Category_Produce"] =0
-    # weather_data_df["Category_Snacks" ] =0
-    # weather_data_df["Category_Standard (Do Not Use)"] =0
-    # weather_data_df['Year'] = weather_data_df["Year"].apply(lambda x: x[0:4])
-  
-    # weather_data_df= weather_data_df.astype("int32")
-
-    # prediction = linear_fetch.predict(weather_data_df)
-
-    # prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
-    # prediction['Category'] = "Category_Dairy"
-
-    # prediction['Date'] = weather_data_df_orig.dt_txt
 
     prediction = prediction.to_dict("records")
 
     return prediction
-    # return df.to_dict("records")
+
     
     
 
