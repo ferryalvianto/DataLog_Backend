@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 
 from models.clean_csv import cleancsv
 from models.model import Sentiments, User, UserInDB, Token
-from models.ml_model_regression import save_model_to_db, load_saved_model_from_db
+from models.ml_model_regression import save_model_to_db, load_saved_model_from_db, load_saved_model_from_db_with_category
 from authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db, client, pwd_context
 from api_weather import get_weather
 
@@ -174,6 +174,13 @@ async def put_model():
         return response
     raise HTTPException(400, f"Something went wrong")
 
+@app.get("/api/quantity_forecast/")
+async def put_model_cat(category: str):
+    response = load_saved_model_from_db_with_category(get_weather(),category)
+    if response:
+        return response
+    raise HTTPException(400, f"Something went wrong")
+
 
 @app.get("/api/revenue_forecast")
 async def get_revenue_forecast():
@@ -223,3 +230,12 @@ async def clean_csv(db:str, id_inventory:str, id_payment:str, date:str):
 #     raise HTTPException(400, f"Something went wrong")
 
 
+
+
+#get forecast by category  
+@app.get("/api/model_regression_result/")
+async def put_model_cat(category: str):
+    response = load_saved_model_from_db_with_category(get_weather(),category)
+    if response:
+        return response
+    raise HTTPException(400, f"Something went wrong")
