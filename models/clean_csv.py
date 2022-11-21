@@ -6,7 +6,7 @@ client = pymongo.MongoClient(
     'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
 
-def cleancsv(db: str, id_inventory: str, id_payment: str, date: str):
+def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str, day: str):
     url = 'https://drive.google.com/uc?id=' + id_inventory
     df = pd.read_csv(url)
 
@@ -226,26 +226,49 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, date: str):
     df = df.dropna()
     df = df.astype({'Establishment': int})
 
+    base_url = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?"
+    query_url = "format=csv&stationID={}&Year={}&Month={}&Day={}&timeframe=1".format('51442', '2022', '09', '11')
+    api_endpoint = base_url + query_url
+    df_temp = pd.read_csv(api_endpoint, skiprows=0)
+
+    df_temp['Date'] = pd.to_datetime(df_temp['Date/Time (LST)']).dt.date
+
+    df_temp['Date'] = df_temp['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+
+    df_temp.dropna()
+
+    df_temp['Max_Temp_C_'] = df_temp['Temp (°C)'].max()
+    df_temp['Min_Temp_C_'] = df_temp['Temp (°C)'].min()
+    df_temp['Temperature'] = round(df_temp['Temp (°C)'].mean(), 2)
+
+    df_temp = df_temp[['Date', 'Temperature', 'Min_Temp_C_', 'Max_Temp_C_']]
+
+    df_temp = df_temp[df_temp['Date'].isin({'2022'+'-09-11'})].reset_index(drop=True)
+
+    df_temp = df_temp.iloc[[0]]
+
+    df['Date'] = df.Date.apply(lambda x: x.strftime('%Y-%m-%d'))
+    df.drop("Time", axis=1, inplace=True)
+
+    df = df.merge(df_temp, on='Date', how='left')
+
     if 'Gift Cards' not in df.columns:
         df['Gift Cards'] = 0
 
     if 'American Express' in df.columns:
         df.rename(columns={'American Express': 'Amex'}, inplace=True)
         df['Discover'] = 0
-    elif 'Discover' in df.columns:    
+    elif 'Discover' in df.columns:
         df['Amex'] = 0
     else:
         df['Amex'] = 0
         df['Discover'] = 0
-        
+
     df = df[['orderID', 'Establishment', 'Employee', 'Name', 'Category', 'Quantity', 'itemPrice', 'Total', 'Cash', 'Debit', 'Visa', 'Mastercard', 'Discover',
-                 'Amex', 'Gift Cards', 'Time', 'hour', 'day', 'month', 'year', 'Date', 'dailyRevenueByOrder', 'dailyRevenue']]
+                'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year', 'Date', 'dailyRevenueByOrder', 'dailyRevenue', 'Temperature', 'Min_Temp_C_', 'Max_Temp_C_']]
 
     df[['orderID', 'Establishment', 'Cash', 'Debit', 'Visa', 'Mastercard', 'Discover', 'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year']] = df[[
-        'orderID', 'Establishment', 'Cash', 'Debit', 'Visa', 'Mastercard', 'Discover', 'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year']].astype(int)
-
-    df['Date'] = df.Date.apply(lambda x: x.strftime('%Y-%m-%d'))
-    df.drop("Time", axis=1, inplace=True)
+            'orderID', 'Establishment', 'Cash', 'Debit', 'Visa', 'Mastercard', 'Discover', 'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year']].astype(int)
 
     df.reset_index(inplace=True)
     df.drop("index", axis=1, inplace=True)
@@ -253,7 +276,8 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, date: str):
     steps_l = list(np.arange(0, len(df), 5000)) + [len(df)]
 
     for start, end in zip(steps_l, steps_l[1:]):
-        client[db]['df_sales'].insert_many(df.iloc[start:end].to_dict(orient="records"))
+        client[db]['df_sales'].insert_many(
+            df.iloc[start:end].to_dict(orient="records"))
 
     df_return = df.head()
     df_return = df_return.to_dict(orient="records")

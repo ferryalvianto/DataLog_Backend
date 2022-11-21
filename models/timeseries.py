@@ -37,3 +37,5 @@ client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mon
 
 # async def save_timeseries_to_db(db: str):
 #     mydb = client[db]
+
+ #only getting relevant Columns for Forecasting Quantity

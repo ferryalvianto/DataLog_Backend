@@ -153,14 +153,14 @@ async def post_todo(sentiments: Sentiments):
 
 
 @app.get("/api/revenues")
-async def get_revenues():
-    response = await fetch_all_revenue()
+async def get_revenues(db:str):
+    response = await fetch_all_revenue(db)
     return response
 
 
 @app.get("/api/revenues/")
-async def get_revenue_by_range(start_date: str, end_date: str):
-    response = await fecth_by_range_revenue(start_date, end_date)
+async def get_revenue_by_range(db:str, start_date: str, end_date: str):
+    response = await fecth_by_range_revenue(db, start_date, end_date)
     if response:
         return response
     raise HTTPException(
@@ -168,23 +168,23 @@ async def get_revenue_by_range(start_date: str, end_date: str):
 
 
 @app.get("/api/quantity_forecast")
-async def put_model():
-    response = load_saved_model_from_db(get_weather())
+async def put_model(db:str):
+    response = load_saved_model_from_db(db, get_weather())
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
 
 @app.get("/api/quantity_forecast/")
-async def put_model_cat(category: str):
-    response = load_saved_model_from_db_with_category(get_weather(),category)
+async def put_model_cat(db:str, category: str):
+    response = load_saved_model_from_db_with_category(db, get_weather(),category)
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
 
 
 @app.get("/api/revenue_forecast")
-async def get_revenue_forecast():
-    response = await fetch_latest_forecast_revenues()
+async def get_revenue_forecast(db:str):
+    response = await fetch_latest_forecast_revenues(db)
     return response
 
 #-------------------------------------------#
@@ -200,23 +200,34 @@ def get_weather_forecast():
 
 
 @app.get("/api/model_regression")
-async def put_model():
-    response = save_model_to_db()
+async def put_model(db:str):
+    response = save_model_to_db(db)
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
 
 @app.get("/api/model_regression_result")
-async def put_model():
-    response = load_saved_model_from_db(get_weather())
+async def put_model(db:str):
+    response = load_saved_model_from_db(db, get_weather())
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
 
+#get forecast by category  
+@app.get("/api/model_regression_result/")
+async def put_model_cat(db:str, category: str):
+    response = load_saved_model_from_db_with_category(db, get_weather(),category)
+    if response:
+        return response
+    raise HTTPException(400, f"Something went wrong")
 
 @app.get("/api/clean_csv")
-async def clean_csv(db:str, id_inventory:str, id_payment:str, date:str):
-    response = cleancsv(db, id_inventory, id_payment, date)
+async def clean_csv(db:str, id_inventory:str, id_payment:str, year:str, month:str, day:str):
+    if db == 'BeFresh':
+        response = cleancsv(db, id_inventory, id_payment, year, month, day)
+    else:
+        response = 'Not available on the DataLog database'
+
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
@@ -229,13 +240,3 @@ async def clean_csv(db:str, id_inventory:str, id_payment:str, date:str):
 #         return response
 #     raise HTTPException(400, f"Something went wrong")
 
-
-
-
-#get forecast by category  
-@app.get("/api/model_regression_result/")
-async def put_model_cat(category: str):
-    response = load_saved_model_from_db_with_category(get_weather(),category)
-    if response:
-        return response
-    raise HTTPException(400, f"Something went wrong")

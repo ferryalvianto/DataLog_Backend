@@ -2,13 +2,13 @@ import motor.motor_asyncio
 from models.model import Revenue
 from models.model import RevenueMaxDate
 
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
-database = client.DataLog
-collection = database.Revenue
-
+client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
 #fetch all revenues
-async def fetch_all_revenue():
+async def fetch_all_revenue(db:str):
+    database = client[db]
+    collection = database.Revenue
+
     revenues = []
     # cursor = collection.find({})
     max_date = collection.find().sort([("ymd",-1)]).limit(1)
@@ -43,10 +43,11 @@ async def fetch_all_revenue():
     return revenues
 
     
-
-
 #detch revenue by range
-async def fecth_by_range_revenue(start_date,end_date):
+async def fecth_by_range_revenue(db, start_date,end_date):
+    database = client[db]
+    collection = database.Revenue
+
     revenues = []
     cursor = collection.find({'ymd': { "$gte": start_date, "$lte":  end_date}}) 
     async for document in cursor:
