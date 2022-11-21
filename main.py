@@ -12,7 +12,7 @@ from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
 from dbs.db_revenue import fecth_by_range_revenue, fetch_all_revenue
 from dbs.db_sentiments import create_sentiments,fecth_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
-from dbs.db_generalproducts import fetch_general_products
+from dbs.db_generalproducts import fetch_general_products, fetch_products_by_date
 
 # an HTTP-specific exception class  to generate exception information
 from fastapi.middleware.cors import CORSMiddleware
@@ -216,4 +216,11 @@ async def fetch_products():
     raise HTTPException(
         404, f"There are not products to show")
 
+@app.get("/api/general_products_by_date")
+async def fetch_products_filtered(start_date: str, end_date: str):
+    response = await fetch_products_by_date(start_date, end_date)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"There are not products to show")
 

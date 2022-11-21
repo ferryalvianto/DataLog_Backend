@@ -25,10 +25,42 @@ async def fetch_general_products():
             "$sort": {"Quantity": 1}
         },
         {
-            "$limit": 10
+            "$limit": 15
         }
     ])
         
     async for document in cursor:
         products.append(General_Products(**document))
+    return products
+
+
+# Fetch general products by date
+async def fetch_products_by_date(start_date,end_date):
+    products = []
+    cursor = collection.aggregate([
+        {
+            "$match":
+            {
+                "Date": {"$gte": start_date, "$lte": end_date}
+            }
+        },
+        {
+            "$group":
+            {
+                "_id": "$Product_Name",
+                "Category": {"$first":"$Category"},
+                "Date": {"$first":"$Date"},
+                "Quantity": {"$sum":"$Quantity"}   
+            }
+        },
+        {
+            "$sort": {"Quantity": 1}
+        },
+        {
+            "$limit": 15
+        }
+    ])
+
+    async for document in cursor:
+        products.append(document)
     return products
