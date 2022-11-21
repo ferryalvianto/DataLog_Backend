@@ -8,30 +8,28 @@ client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@c
 database = client.DataLog
 collection = database.Order_Item_Transaction
 
-async def fetch_general_products(category, start_date, end_date):
+async def fetch_general_products(date: str):
     products = []
 
     cursor = collection.aggregate([
         {
-            "$match" : 
+            "$project":
             {
-                "$and": [
-                    {"Category" : category},
-                    {"Date": {"$gte" : start_date,'$lte': end_date}}
-                ]
+                 "Quantity": "$Quantity",
+                 "Category": "$Category",
+                 "Product_Name": "$Product_Name",
+                 "Date": "$Date"
             }
         },
         {
-            "$group": 
+            "$match":
             {
-                "_id": {
-                    "Product_Category" : "$Category",
-                    "Product": "$Product_Name"}, 
-                    "Quantity_Sold": {"$sum": "$Quantity"}
+                "Date": date
             }
+
         },
         {
-            "$sort": {"Quantity_Sold": 1}
+            "$sort": {"Quantity": 1}
         },
         {
             "$limit": 10
@@ -39,5 +37,5 @@ async def fetch_general_products(category, start_date, end_date):
     ])
         
     async for document in cursor:
-        products.append(document)
+        products.append(General_Products(**document))
     return products

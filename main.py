@@ -209,6 +209,11 @@ async def put_model():
 #-------------------------------------------#
 # General Products
 @app.get("/api/general_products")
-async def fetch_products(category: str, start_date: str, end_date: str):
-    response = await  fetch_general_products(category, start_date, end_date)
-    return response
+async def fetch_products(date: str):
+    response = await fetch_general_products(date)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"There are no products to show")
+
+

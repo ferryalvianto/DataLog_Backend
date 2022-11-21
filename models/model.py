@@ -75,8 +75,7 @@ class RevenueMaxDate(BaseModel):
     revenue: int
 
 class General_Products(BaseModel):
-    Product_Category: str
-    Start_date: date
-    End_date: date
-    Product: str
-    Quantity_Sold: int
+    Category: str
+    Date: str
+    Product_Name: str
+    Quantity: int
