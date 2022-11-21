@@ -8,7 +8,7 @@ client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@c
 database = client.DataLog
 collection = database.Order_Item_Transaction
 
-async def fetch_general_products(date: str):
+async def fetch_general_products():
     products = []
 
     cursor = collection.aggregate([
@@ -20,13 +20,6 @@ async def fetch_general_products(date: str):
                  "Product_Name": "$Product_Name",
                  "Date": "$Date"
             }
-        },
-        {
-            "$match":
-            {
-                "Date": date
-            }
-
         },
         {
             "$sort": {"Quantity": 1}
