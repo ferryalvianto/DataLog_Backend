@@ -12,6 +12,7 @@ from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
 from dbs.db_revenue import fecth_by_range_revenue, fetch_all_revenue
 from dbs.db_sentiments import create_sentiments,fecth_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
+from dbs.db_heatmap import fetch_all_ht_category
 
 # an HTTP-specific exception class  to generate exception information
 from fastapi.middleware.cors import CORSMiddleware
@@ -137,8 +138,6 @@ async def get_sentiment_by_range(start_date: str, end_date: str):
         404, f"There is no sentiments from {start_date} and {end_date}")
 
 #inserting sentiments
-
-
 @app.post("/api/insert_sentiments/", response_model=Sentiments)
 async def post_todo(sentiments: Sentiments):
     response = await create_sentiments(sentiments.dict())
@@ -220,3 +219,19 @@ async def put_model_cat(category: str):
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
+
+
+#get heatmap location and quantity
+@app.get("/api/heatmap")
+async def get_heatmap():
+    response = await fetch_all_ht_category()
+    return response
+
+
+# @app.get("/api/wastage/")
+# async def get_by_range_wastage(start_date: str, end_date: str):
+#     response = await fetch_date_range_wastage(start_date, end_date)
+#     if response:
+#         return response
+#     raise HTTPException(
+#         404, f"There is no wastage from {start_date} and {end_date}")
