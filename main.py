@@ -12,7 +12,7 @@ from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
 from dbs.db_revenue import fecth_by_range_revenue, fetch_all_revenue
 from dbs.db_sentiments import create_sentiments,fecth_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
-from dbs.db_heatmap import fetch_all_ht_category
+from dbs.db_heatmap import fetch_all_ht_category, fetch_date_range_ht_category
 
 # an HTTP-specific exception class  to generate exception information
 from fastapi.middleware.cors import CORSMiddleware
@@ -227,11 +227,11 @@ async def get_heatmap():
     response = await fetch_all_ht_category()
     return response
 
-
-# @app.get("/api/wastage/")
-# async def get_by_range_wastage(start_date: str, end_date: str):
-#     response = await fetch_date_range_wastage(start_date, end_date)
-#     if response:
-#         return response
-#     raise HTTPException(
-#         404, f"There is no wastage from {start_date} and {end_date}")
+#get heatmap location and quantity with date range filter
+@app.get("/api/heatmap/")
+async def get_by_range_heatmap(start_date: str, end_date: str):
+    response = await fetch_date_range_ht_category(start_date, end_date)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"There is no records from {start_date} and {end_date}")
