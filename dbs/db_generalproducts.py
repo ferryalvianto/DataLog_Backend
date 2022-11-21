@@ -17,8 +17,7 @@ async def fetch_general_products(category, start_date, end_date):
             {
                 "$and": [
                     {"Category" : category},
-                    {"Date_fmt": {"$gte" : datetime.fromisoformat(start_date), 
-                    '$lte': datetime.fromisoformat(end_date)}}
+                    {"Date": {"$gte" : start_date,'$lte': end_date}}
                 ]
             }
         },
