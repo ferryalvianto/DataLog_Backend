@@ -127,7 +127,7 @@ def load_saved_model_from_db(weather_data):
         df[column] = column
 
     for column in Categories:
-        for i in range(1,len(weather_data)):
+        for i in range(len(weather_data)):
             df = df.append({column:1, 'Temperature': weather_data[i].temp_avg
             , 
             'Min_Temp_C_':weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
@@ -213,7 +213,7 @@ def load_saved_model_from_db_with_category(weather_data, category):
    
 
     for column in Categories:
-        for i in range(1,len(weather_data)):
+        for i in range(len(weather_data)):
             df = df.append({column:1, 'Temperature': weather_data[i].temp_avg
             , 
             'Min_Temp_C_':weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
