@@ -208,8 +208,8 @@ async def put_model():
 
 
 @app.get("/api/clean_csv")
-async def clean_csv(db:str, id:str, name:str, date:str):
-    response = cleancsv(db, id, name, date)
+async def clean_csv(db:str, id_inventory:str, id_payment:str, date:str):
+    response = cleancsv(db, id_inventory, id_payment, date)
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
