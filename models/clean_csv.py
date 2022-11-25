@@ -227,7 +227,7 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     df = df.astype({'Establishment': int})
 
     base_url = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?"
-    query_url = "format=csv&stationID={}&Year={}&Month={}&Day={}&timeframe=1".format('51442', '2022', '09', '11')
+    query_url = "format=csv&stationID={}&Year={}&Month={}&Day={}&timeframe=1".format('51442', year, month, day)
     api_endpoint = base_url + query_url
     df_temp = pd.read_csv(api_endpoint, skiprows=0)
 
