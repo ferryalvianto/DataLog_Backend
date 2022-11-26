@@ -4,9 +4,10 @@ motor==3.1.1
 numpy==1.23.4
 pandas==1.5.1
 passlib==1.7.4
-prophet==1.1.1
+prophet==1.0
 pydantic==1.9.0
 pymongo==4.3.2
+pystan==2.19.1.1
 python_jose==3.3.0
 python-multipart==0.0.5
 requests==2.28.1

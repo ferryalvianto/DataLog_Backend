@@ -30,7 +30,7 @@ dayofweek_colors = {0: 'tab:blue', 1: 'tab:orange',
 
 client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
-async def save_timeseries_to_db(db: str):
+def save_timeseries_to_db(db: str):
     oa19 = pd.read_csv('https://drive.google.com/uc?id=1pdMJvWVmV8KLwpIkfBmD0yLZd1Zq9Hou')
     oa20 = pd.read_csv('https://drive.google.com/uc?id=1sd7UEHk8fhHk52W61aupnnxRBnP2cTxg')
     oa21 = pd.read_csv('https://drive.google.com/uc?id=11XGlbZknAqXxhB3D-ZDGC7kBWIYG-wLv')
@@ -118,4 +118,4 @@ async def save_timeseries_to_db(db: str):
                              'name': 'timeseries_model', 
                             'created_time': time.time()})
 
-    return result
+    return 'test'
