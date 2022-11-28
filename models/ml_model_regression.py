@@ -52,7 +52,6 @@ def save_model_to_db(db:str):
     X = df.drop("daily_quantity_sold", axis=1)
     Y = df.daily_quantity_sold
 
-    
     linear_model = LinearRegression()
     xtrain, xtest, ytrain, ytest = train_test_split(X, Y, test_size=0.20, random_state=0)
     linear_model.fit(xtrain,ytrain)
@@ -73,7 +72,6 @@ def save_model_to_db(db:str):
     info = mycon.insert_one({ model_name: pickled_model, 
                              'name': model_name, 
                             'created_time': time.time()})
-    
     
     details = {
         'model_name' : model_name,
@@ -167,7 +165,6 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
         json_data = i
 
     pickled_model = json_data[model_name]   
-
     linear_fetch = pickle.loads(pickled_model)
 
     #fetch category mongodb
@@ -187,7 +184,6 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
     df["Year"] = ""
     df["Category"] = ""
 
-
     #creating columns for Categories
     for column in Categories:
         df[column] = column
@@ -200,27 +196,19 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
             'Year': weather_data[i].dt_txt, 'Category': column
             }, ignore_index=True)
 
-    
     df.fillna(0, inplace=True)
-
     df_orig = df.copy()
     df.drop("Category", axis=1, inplace=True)
-
     df["Year"] = df["Year"].apply(lambda x: x[0:4])
-
     df= df.astype("int32")
 
-
     prediction = linear_fetch.predict(df)
-
     prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
-    
     prediction['Category'] = df_orig.Category
     prediction['Date'] = df_orig.Year
     prediction = prediction.loc[prediction.Category==category]
     prediction = prediction.to_dict("records")
 
-    
     return prediction
     
     

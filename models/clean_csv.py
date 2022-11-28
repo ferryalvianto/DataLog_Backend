@@ -279,7 +279,4 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
         client[db]['df_sales'].insert_many(
             df.iloc[start:end].to_dict(orient="records"))
 
-    df_return = df.head()
-    df_return = df_return.to_dict(orient="records")
-
-    return df_return
+    return df

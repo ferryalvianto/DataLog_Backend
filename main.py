@@ -15,6 +15,11 @@ from dbs.db_revenue import fecth_by_range_revenue, fetch_all_revenue
 from dbs.db_sentiments import create_sentiments,fecth_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
 
+import pandas as pd
+import dask
+import dask.dataframe as dd
+import pymongo
+
 # an HTTP-specific exception class  to generate exception information
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
@@ -33,6 +38,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+
 
 # APIs
 
@@ -199,6 +207,17 @@ def get_weather_forecast():
 #-------------------------------------------#
 # model api
 
+oa_urls = ['https://drive.google.com/uc?id=1pdMJvWVmV8KLwpIkfBmD0yLZd1Zq9Hou',
+        'https://drive.google.com/uc?id=1sd7UEHk8fhHk52W61aupnnxRBnP2cTxg',
+        'https://drive.google.com/uc?id=11XGlbZknAqXxhB3D-ZDGC7kBWIYG-wLv']
+oa_dfs = [dask.delayed(pd.read_csv)(url) for url in oa_urls]
+oa = dd.from_delayed(oa_dfs)
+
+cy_urls= ['https://drive.google.com/uc?id=1loqBDfWZQ96Z3-KoJSSzNb0mngGo-YQf',
+        'https://drive.google.com/uc?id=1FMg0L0ia5pRqQzctqVQDJFxFQyXTPf6y',
+        'https://drive.google.com/uc?id=1o0cvR0ZrhyA3Ekeoy9HF2J8IRamqeRb-']
+cy_dfs = [dask.delayed(pd.read_csv)(url) for url in cy_urls]
+cy = dd.from_delayed(cy_dfs)
 
 @app.get("/api/model_regression")
 async def put_model(db:str):
@@ -225,19 +244,63 @@ async def put_model_cat(db:str, category: str):
 @app.get("/api/clean_csv")
 async def clean_csv(db:str, id_inventory:str, id_payment:str, year:str, month:str, day:str):
     if db == 'BeFresh':
-        response = cleancsv(db, id_inventory, id_payment, year, month, day)
+        df = cleancsv(db, id_inventory, id_payment, year, month, day)
     else:
-        response = 'Not available on the DataLog database'
+        return 'Not available on the DataLog database'
 
-    if response:
-        return response
+    if df:
+        return 'success'
     raise HTTPException(400, f"Something went wrong")
 
 
 @app.get("/api/timeseries")
 async def timeseries_model(db:str):
-    response = save_timeseries_to_db(db)
+    response = save_timeseries_to_db(db, cy, oa)
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
+
+@app.get("/api/upload_date_log")
+async def upload_date_log(db:str, yyyy:str, mm:str, dd:str):
+    mydb = client[db]
+    col = mydb['df_sales']
+    results = col.find({"Date": yyyy+'-'+mm+'-'+dd})
+
+    for res in results:
+        date = res['Date']
+        establishment = res['Establishment']
+
+        if yyyy+'-'+mm+'-'+dd in date:
+            return 'True'
+        else:
+            return 'False'
+
+@app.get("/api/upload_log")
+async def upload_log(db:str, yyyy:str, mm:str, dd:str):
+    mydb = client[db]
+    col = mydb['df_sales']
+    results = col.find({"Date": yyyy+'-'+mm+'-'+dd, '$or':[{"Establishment":0}, {"Establishment":1}]}, {"_id": 0,"Date":1, "Establishment":1})
+
+    for res in results:
+        establishment = res['Establishment']
+        date = res['Date']
+
+        if yyyy+'-'+mm+'-'+dd in date:
+            if '0' not in str(establishment):
+                return '1'
+                
+            if '1' not in str(establishment):
+                return '0'
+                
+            if '0' and '1' in str(establishment):
+                return 'Train models now.'
+
+@app.get("/api/train_models")
+async def train_models(db:str, yyyy:str, mm:str, dd:str):
+    timeseries = await save_timeseries_to_db(db, cy, oa, yyyy, mm, dd)
+
+    return 'success'
+
+    
+
 
