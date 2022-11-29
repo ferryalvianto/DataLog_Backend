@@ -1,7 +1,5 @@
 import pymongo
 import pandas as pd
-import numpy as np
-from sklearn import datasets
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 import pickle
@@ -10,7 +8,7 @@ import time
 myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
 
-def save_model_to_db(db:str):
+def save_model_to_db(db:str, yyyy, mm, dd):
     mydb = myclient[db]
 
     if db == 'BeFresh':
@@ -70,8 +68,9 @@ def save_model_to_db(db:str):
     #creating collection
     mycon = mydb[dbconnection]
     info = mycon.insert_one({ model_name: pickled_model, 
-                             'name': model_name, 
-                            'created_time': time.time()})
+                            'name': model_name, 
+                            'created_time': time.time(),
+                            'latest_date_in_model': yyyy+'-'+mm+'-'+dd})
     
     details = {
         'model_name' : model_name,

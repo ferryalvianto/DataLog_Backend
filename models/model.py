@@ -22,14 +22,8 @@ class User(BaseModel):
     disabled: Union[bool, None] = None
     db: Union[str, None] = None
 
-
 class UserInDB(User):
     password: str
-
-class DailyRevenueForecast(BaseModel):
-    Date: str
-    PredictedRevenue: int
-    Flag_latest: str
 
 #didn't really use, for noww
 class Wastage(BaseModel):
@@ -70,5 +64,5 @@ class ML_Model(BaseModel):
 
 
 class RevenueMaxDate(BaseModel):
-    ymd: str
+    Date: str
     revenue: int

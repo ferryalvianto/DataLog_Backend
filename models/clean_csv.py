@@ -5,7 +5,6 @@ import pymongo
 client = pymongo.MongoClient(
     'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
-
 def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str, day: str):
     url = 'https://drive.google.com/uc?id=' + id_inventory
     df = pd.read_csv(url)
@@ -243,7 +242,7 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
 
     df_temp = df_temp[['Date', 'Temperature', 'Min_Temp_C_', 'Max_Temp_C_']]
 
-    df_temp = df_temp[df_temp['Date'].isin({'2022'+'-09-11'})].reset_index(drop=True)
+    df_temp = df_temp[df_temp['Date'].isin({year+'-'+month+'-'+day})].reset_index(drop=True)
 
     df_temp = df_temp.iloc[[0]]
 
@@ -273,10 +272,57 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     df.reset_index(inplace=True)
     df.drop("index", axis=1, inplace=True)
 
+    cpi_url = "https://www.bankofcanada.ca/valet/observations/group/CPI_MONTHLY/csv"
+    col_names = ["date", "V41690973"]
+    df_cpi = pd.read_csv(cpi_url, sep='delimiter', header=None, engine='python')
+    df_cpi = df_cpi.iloc[20:]
+    df_cpi.reset_index(inplace=True)
+    df_cpi.drop("index", axis=1, inplace=True)
+    headers = df_cpi.iloc[0].values
+    df_cpi.columns = headers
+    df_cpi.drop(index=0, axis=0, inplace=True)
+    df_cpi[['date', 'cpis']] = df_cpi['"date","V41690973","V41690914","STATIC_TOTALCPICHANGE","CPI_TRIM","CPI_MEDIAN","CPI_COMMON","ATOM_V41693242","STATIC_CPIXFET","CPIW"'].str.split(',', n=1, expand=True)
+    df_cpi = df_cpi[['date','cpis']].copy()
+    df_cpi[['cpi','cpis']] = df_cpi['cpis'].str.split(',', n=1, expand=True)
+    df_cpi = df_cpi[['date','cpi']].copy()
+    df_cpi['date'] = df_cpi['date'].str.replace('"', '')
+    df_cpi['cpi'] = df_cpi['cpi'].str.replace('"', '')
+    df_cpi['date'] = pd.to_datetime(df_cpi['date'])
+    df_cpi['month'] = df_cpi['date'].dt.month
+    df_cpi['year'] = df_cpi['date'].dt.year
+    df_cpi = df_cpi[['year','month','cpi']].copy()
+    df_cpi['cpi'] = df_cpi['cpi'].astype(float)
+
+    df = df.merge(df_cpi, on=['year','month'], how='left')
+
+    if df['cpi'].isnull().values.any():
+        avg = df_cpi['cpi'][-3:].mean() + (df_cpi['cpi'][-1:] * 0.01)
+        avg = round(avg.iloc[0], 2)
+        df['cpi'] = df['cpi'].fillna(avg)
+
+    #reading gas prices csv
+    gas = pd.read_csv('https://www150.statcan.gc.ca/t1/tbl1/en/dtl!downloadDbLoadingData-nonTraduit.action?pid=1810000101&latestN=0&startDate=20220101&endDate=20221201&csvLocale=en&selectedMembers=%5B%5B%5D%2C%5B2%5D%5D&checkedLevels=0D1%2C0D2')
+    gas = gas[gas['GEO'].str.contains('Vancouver')]
+    gas = gas[['REF_DATE','VALUE']].copy()
+    gas[['year', 'month']] = gas['REF_DATE'].str.split('-', 1, expand=True)
+    gas[['year', 'month']] = gas[['year', 'month']].astype(int)
+    gas = gas[['year','month','VALUE']].copy()
+    gas.rename(columns={'VALUE': 'averageGasPrice'}, inplace=True)
+
+    df = df.merge(gas, on=['month','year'], how='left')
+
+    if df['averageGasPrice'].isnull().values.any():
+        avg = gas['averageGasPrice'][-3:].mean() + (gas['averageGasPrice'][-1:] * 0.01)
+        avg = round(avg.iloc[0], 2)
+        df['averageGasPrice'] = df['averageGasPrice'].fillna(avg)
+
     steps_l = list(np.arange(0, len(df), 5000)) + [len(df)]
 
     for start, end in zip(steps_l, steps_l[1:]):
         client[db]['df_sales'].insert_many(
             df.iloc[start:end].to_dict(orient="records"))
 
-    return df
+    df_return = df.head()
+    df_return = df_return.to_dict(orient="records")
+
+    return df_return
