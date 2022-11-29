@@ -17,7 +17,7 @@ async def fetch_all_sentiments():
     return sentiments
 
 #count for each sentiments
-async def fecth_by_range_sentiments(start_date,end_date):
+async def fetch_by_range_sentiments(start_date,end_date):
     sentiments = []
     cursor = collection.aggregate([ {'$match': {'Date': { "$gte": start_date, "$lte":  end_date} }},
                                     {'$group': {"_id" : "$Classification", "Total_Count": {"$sum": 1}   }}
