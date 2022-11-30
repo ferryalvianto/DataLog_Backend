@@ -37,9 +37,6 @@ async def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
     oa = oa.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
     cy = cy.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
 
-    cy = cy.compute()
-    oa = oa.compute()
-
     oa['Date'] = pd.to_datetime(oa['Date'])
     cy['Date'] = pd.to_datetime(cy['Date'])
 

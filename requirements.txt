@@ -1,5 +1,4 @@
 cloudpickle==2.2.0
-dask==2022.11.1
 fastapi==0.86.0
 jose==1.0.0
 motor==3.1.1

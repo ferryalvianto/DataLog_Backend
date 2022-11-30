@@ -16,8 +16,6 @@ from dbs.db_sentiments import create_sentiments,fetch_by_range_sentiments,fetch_
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
 
 import pandas as pd
-import dask
-import dask.dataframe as dd
 import pymongo
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
@@ -211,15 +209,23 @@ def get_weather_forecast():
 # model api
 
 async def read_oa_csv():
-    oa_urls = ['1l7qRdYza9LF80UZrKDJ7ucmdNYMBPvbB', '1jNfSca67sEvvkLkZkUEtgRxcwHEmbjTC', '1Qfm7iv_-msBqE8xs_gt-2UBwWndheOxi','1BGT8fjo-bD4trGOGBfZk7S3DCtp9z-sb']
-    oa_dfs = [dask.delayed(pd.read_pickle)('https://drive.google.com/uc?id='+url, compression='gzip') for url in oa_urls]
-    oa = dd.from_delayed(oa_dfs)
+    oa1 = pd.read_pickle('https://drive.google.com/uc?id=1l7qRdYza9LF80UZrKDJ7ucmdNYMBPvbB', compression='gzip')
+    oa2= pd.read_pickle('https://drive.google.com/uc?id=1jNfSca67sEvvkLkZkUEtgRxcwHEmbjTC', compression='gzip')
+    oa3 = pd.read_pickle('https://drive.google.com/uc?id=1Qfm7iv_-msBqE8xs_gt-2UBwWndheOxi', compression='gzip')
+    oa4 = pd.read_pickle('https://drive.google.com/uc?id=1BGT8fjo-bD4trGOGBfZk7S3DCtp9z-sb', compression='gzip')
+    oa = pd.concat([oa1, oa2], ignore_index=True, axis=0)
+    oa = pd.concat([oa, oa3], ignore_index=True, axis=0)
+    oa = pd.concat([oa, oa4], ignore_index=True, axis=0)
     return oa
 
 async def read_cy_csv():
-    cy_urls= ['1Ujp7hbfnP5nz0Ceo8cjsfxFPIWAaAe2Q','17XfesauEIBESFvGdOgQg4neWxHTVRJYP','1ln9nPdZAI0d8dj2qa_w0Lc0Yma1HzqlS','1uv_Pt2bOYTMfoUWrnFfUErjJY7NIVy7S']
-    cy_dfs = [dask.delayed(pd.read_pickle)('https://drive.google.com/uc?id='+url, compression='gzip') for url in cy_urls]
-    cy = dd.from_delayed(cy_dfs)
+    cy1 = pd.read_pickle('https://drive.google.com/uc?id=1Ujp7hbfnP5nz0Ceo8cjsfxFPIWAaAe2Q', compression='gzip')
+    cy2 = pd.read_pickle('https://drive.google.com/uc?id=17XfesauEIBESFvGdOgQg4neWxHTVRJYP', compression='gzip')
+    cy3 = pd.read_pickle('https://drive.google.com/uc?id=1ln9nPdZAI0d8dj2qa_w0Lc0Yma1HzqlS', compression='gzip')
+    cy4 = pd.read_pickle('https://drive.google.com/uc?id=1uv_Pt2bOYTMfoUWrnFfUErjJY7NIVy7S', compression='gzip')
+    cy = pd.concat([cy1, cy2], ignore_index=True, axis=0)
+    cy = pd.concat([cy, cy3], ignore_index=True, axis=0)
+    cy = pd.concat([cy, cy4], ignore_index=True, axis=0)
     return cy
 
 @app.get("/api/model_regression")
@@ -341,7 +347,7 @@ async def upload_log(db:str, yyyy:str, mm:str, dd:str):
         return 'Please upload CSV files for these dates:', dates
     
 
-@app.get("/api/train_models")
+@app.post("/api/train_models")
 async def train_models(db:str, yyyy:str, mm:str, dd:str):
     responses = []
     cy = await read_cy_csv()
