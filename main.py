@@ -346,9 +346,9 @@ async def train_models(db:str, yyyy:str, mm:str, dd:str):
     responses = []
     cy = await read_cy_csv()
     oa = await read_oa_csv()
-    timeseries = save_timeseries_to_db(db, cy, oa, yyyy, mm, dd)
+    timeseries = await save_timeseries_to_db(db, cy, oa, yyyy, mm, dd)
     responses.append(timeseries)
-    linreg = save_model_to_db(db, yyyy, mm, dd)
+    linreg = await save_model_to_db(db, yyyy, mm, dd)
     responses.append('Linear Regression has been updated')
     return responses
 
