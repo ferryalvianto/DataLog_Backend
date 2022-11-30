@@ -1,6 +1,5 @@
 from celery import Celery
 import pandas as pd
-import os
 
 from models.timeseries import save_timeseries_to_db
 from models.ml_model_regression import save_model_to_db
