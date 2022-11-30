@@ -1,1 +1,1 @@
-web: uvicorn --host 0.0.0.0 --port $PORT main:app --timeout 180
+web: uvicorn --host 0.0.0.0 --port $PORT main:app --timeout-keep-alive 180
