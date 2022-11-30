@@ -6,8 +6,6 @@ from models.timeseries import save_timeseries_to_db
 from models.ml_model_regression import save_model_to_db
 
 app = Celery("tasks", broker='redis://127.0.0.1:6379/0', backend='redis://127.0.0.1:6379')
-app.conf.update(broker_url=os.environ['REDIS_URL'],
-                result_backend=os.environ['REDIS_URL'])
 
 def read_oa_csv():
     oa1 = pd.read_pickle('https://drive.google.com/uc?id=1l7qRdYza9LF80UZrKDJ7ucmdNYMBPvbB', compression='gzip')
