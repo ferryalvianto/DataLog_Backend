@@ -1,10 +1,13 @@
 from celery import Celery
 import pandas as pd
+import os
 
 from models.timeseries import save_timeseries_to_db
 from models.ml_model_regression import save_model_to_db
 
-app = Celery("tasks", broker='redis://redis:6379/0')
+app = Celery("tasks", broker='redis://localhost:6379/0', backend='redis://localhost')
+app.conf.update(broker_url=os.environ['REDIS_URL'],
+                result_backend=os.environ['REDIS_URL'])
 
 def read_oa_csv():
     oa1 = pd.read_pickle('https://drive.google.com/uc?id=1l7qRdYza9LF80UZrKDJ7ucmdNYMBPvbB', compression='gzip')
