@@ -7,7 +7,7 @@ from models.timeseries import save_timeseries_to_db
 from models.clean_csv import cleancsv
 from models.model import Sentiments, User, UserInDB, Token
 from models.ml_model_regression import save_model_to_db, load_saved_model_from_db, load_saved_model_from_db_with_category
-from authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db, client, pwd_context
+from authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db
 from api_weather import get_weather
 
 from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
@@ -21,6 +21,7 @@ import dask.dataframe as dd
 import pymongo
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
+from passlib.context import CryptContext
 
 # an HTTP-specific exception class  to generate exception information
 from fastapi.middleware.cors import CORSMiddleware
@@ -76,6 +77,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     else:
        raise HTTPException(status_code=400,detail="Incorrect username") 
 
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     if pwd_context.verify(form_data.password, user.password):
         user
     else:
