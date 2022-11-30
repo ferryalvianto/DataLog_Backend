@@ -209,20 +209,14 @@ def get_weather_forecast():
 # model api
 
 async def read_oa_csv():
-    oa_urls = ['https://drive.google.com/uc?id=1pdMJvWVmV8KLwpIkfBmD0yLZd1Zq9Hou',
-            'https://drive.google.com/uc?id=1sd7UEHk8fhHk52W61aupnnxRBnP2cTxg',
-            'https://drive.google.com/uc?id=11XGlbZknAqXxhB3D-ZDGC7kBWIYG-wLv',
-            'https://drive.google.com/uc?id=1XBsq2mwjpzppivuODh8Z8imAVmLoYgjx']
-    oa_dfs = [dask.delayed(pd.read_csv)(url) for url in oa_urls]
+    oa_urls = ['1l7qRdYza9LF80UZrKDJ7ucmdNYMBPvbB', '1jNfSca67sEvvkLkZkUEtgRxcwHEmbjTC', '1Qfm7iv_-msBqE8xs_gt-2UBwWndheOxi','1BGT8fjo-bD4trGOGBfZk7S3DCtp9z-sb']
+    oa_dfs = [dask.delayed(pd.read_pickle)('https://drive.google.com/uc?id='+url, compression='gzip') for url in oa_urls]
     oa = dd.from_delayed(oa_dfs)
     return oa
 
 async def read_cy_csv():
-    cy_urls= ['https://drive.google.com/uc?id=1loqBDfWZQ96Z3-KoJSSzNb0mngGo-YQf',
-            'https://drive.google.com/uc?id=1FMg0L0ia5pRqQzctqVQDJFxFQyXTPf6y',
-            'https://drive.google.com/uc?id=1o0cvR0ZrhyA3Ekeoy9HF2J8IRamqeRb-',
-            'https://drive.google.com/uc?id=1_sPA-bnAWnkAvNUGljJoTxXPaNZiLI_B']
-    cy_dfs = [dask.delayed(pd.read_csv)(url) for url in cy_urls]
+    cy_urls= ['1Ujp7hbfnP5nz0Ceo8cjsfxFPIWAaAe2Q','17XfesauEIBESFvGdOgQg4neWxHTVRJYP','1ln9nPdZAI0d8dj2qa_w0Lc0Yma1HzqlS','1uv_Pt2bOYTMfoUWrnFfUErjJY7NIVy7S']
+    cy_dfs = [dask.delayed(pd.read_pickle)('https://drive.google.com/uc?id='+url, compression='gzip') for url in cy_urls]
     cy = dd.from_delayed(cy_dfs)
     return cy
 
