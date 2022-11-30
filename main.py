@@ -121,16 +121,16 @@ async def update_user(username: str, db:str, user: User):
 
 
 @app.get("/api/wastage")
-async def get_wastage():
-    response = await fetch_all_wastage()
+async def get_wastage(db:str):
+    response = await fetch_all_wastage(db)
     return response
 
 # wastage by range
 
 
 @app.get("/api/wastage/")
-async def get_by_range_wastage(start_date: str, end_date: str):
-    response = await fetch_date_range_wastage(start_date, end_date)
+async def get_by_range_wastage(db,start_date: str, end_date: str):
+    response = await fetch_date_range_wastage(db,start_date, end_date)
     if response:
         return response
     raise HTTPException(
@@ -142,14 +142,14 @@ async def get_by_range_wastage(start_date: str, end_date: str):
 
 
 @app.get("/api/sentiments")
-async def get_sentiment():
-    response = await fetch_all_sentiments()
+async def get_sentiment(db:str):
+    response = await fetch_all_sentiments(db)
     return response
 
 
 @app.get("/api/sentiments/")
-async def get_sentiment_by_range(start_date: str, end_date: str):
-    response = await fetch_by_range_sentiments(start_date, end_date)
+async def get_sentiment_by_range(db:str,start_date: str, end_date: str):
+    response = await fetch_by_range_sentiments(db,start_date, end_date)
     if response:
         return response
     raise HTTPException(
@@ -183,6 +183,10 @@ async def get_revenue_by_range(db:str, start_date: str, end_date: str):
         404, f"There is no revenues from {start_date} and {end_date}")
 
 
+#-------------------------------------------#
+# quantity forecast
+
+
 @app.get("/api/quantity_forecast")
 async def put_model(db:str):
     response = load_saved_model_from_db(db, get_weather())
@@ -196,6 +200,8 @@ async def put_model_cat(db:str, category: str):
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
+
+#-------------------------------------------#
 
 
 @app.get("/api/revenue_forecast")
@@ -274,14 +280,14 @@ async def timeseries_model(db:str, yyyy:str, mm:str, dd:str):
 
     #get heatmap location and quantity
 @app.get("/api/heatmap")
-async def get_heatmap():
+async def get_heatmap(db:str):
     response = await fetch_all_ht_category()
     return response
 
 #get heatmap location and quantity with date range filter
 @app.get("/api/heatmap/")
-async def get_by_range_heatmap(start_date: str, end_date: str):
-    response = await fetch_date_range_ht_category(start_date, end_date)
+async def get_by_range_heatmap(db:str,start_date: str, end_date: str):
+    response = await fetch_date_range_ht_category(db,start_date, end_date)
     if response:
         return response
     raise HTTPException(

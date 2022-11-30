@@ -30,27 +30,47 @@ async def fetch_all_revenue(db:str):
                 }
         }
         ,
+        {'$group': {"_id" : "$Date", "Revenue": {"$first": "$revenue"},  "year": {"$first": "$year"}, "month": {"$first": "$month"} }}
+        ,
         {
             "$match" : { "month" :max_month, "year": max_year }
+        },
+        {
+            "$project":
+                {
+                    "Date" : "$id",
+                    "revenue" : "$Revenue"
+                }
         }
 
     ])
 
 
     async for document in cursor:
-        revenues.append(RevenueMaxDate(**document))
+        revenues.append(document)
     return revenues
 
-    
+
 #detch revenue by range
 async def fetch_by_range_revenue(db, start_date,end_date):
-    database = client[db]
-    collection = database.Revenue
-
     revenues = []
-    cursor = collection.find({'ymd': { "$gte": start_date, "$lte":  end_date}}) 
+    mydb = client[db]
+    collection =mydb['df_sales']
+    revenues = []
+    # cursor = collection.find({'Date': { "$gte": start_date, "$lte":  end_date}}) 
+    cursor = collection.aggregate([
+         {'$group': {"_id" : "$Date", "Revenue": {"$first": "$dailyRevenue"} }}
+        ,
+        {
+            "$match" : {'_id': { "$gte": start_date, "$lte":  end_date}
+        }
+        }
+
+    ])
+
+
     async for document in cursor:
-        revenues.append(Revenue(**document))
+         revenues.append(document)
     return revenues
 
 
