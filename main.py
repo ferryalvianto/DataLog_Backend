@@ -3,10 +3,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta,datetime
 from fastapi.encoders import jsonable_encoder
 
-from models.timeseries import save_timeseries_to_db
 from models.clean_csv import cleancsv
 from models.model import Sentiments, User, UserInDB, Token
-from models.ml_model_regression import save_model_to_db, load_saved_model_from_db, load_saved_model_from_db_with_category
+from models.ml_model_regression import load_saved_model_from_db, load_saved_model_from_db_with_category
 from authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db
 from api_weather import get_weather
 
@@ -20,6 +19,9 @@ import pymongo
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
+import celery
+import tasks
+from tasks import add, train_models_task
 
 # an HTTP-specific exception class  to generate exception information
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,12 +48,17 @@ app.add_middleware(
 # authentication
 
 @app.get('/')
-async def test():
-    return {"hello":"world"}
+def test():
+    return 'hi'
+
+@app.get('/')
+def test():
+    result = tasks.add.delay(2, 2)
+    return {"2+2": result.get()}
 
 
 @app.get('/api/get-dbs')
-async def get_dbs():
+def get_dbs():
     response = get_db_names()
     if response:
         return response
@@ -208,32 +215,12 @@ def get_weather_forecast():
 #-------------------------------------------#
 # model api
 
-async def read_oa_csv():
-    oa1 = pd.read_pickle('https://drive.google.com/uc?id=1l7qRdYza9LF80UZrKDJ7ucmdNYMBPvbB', compression='gzip')
-    oa2= pd.read_pickle('https://drive.google.com/uc?id=1jNfSca67sEvvkLkZkUEtgRxcwHEmbjTC', compression='gzip')
-    oa3 = pd.read_pickle('https://drive.google.com/uc?id=1Qfm7iv_-msBqE8xs_gt-2UBwWndheOxi', compression='gzip')
-    oa4 = pd.read_pickle('https://drive.google.com/uc?id=1BGT8fjo-bD4trGOGBfZk7S3DCtp9z-sb', compression='gzip')
-    oa = pd.concat([oa1, oa2], ignore_index=True, axis=0)
-    oa = pd.concat([oa, oa3], ignore_index=True, axis=0)
-    oa = pd.concat([oa, oa4], ignore_index=True, axis=0)
-    return oa
-
-async def read_cy_csv():
-    cy1 = pd.read_pickle('https://drive.google.com/uc?id=1Ujp7hbfnP5nz0Ceo8cjsfxFPIWAaAe2Q', compression='gzip')
-    cy2 = pd.read_pickle('https://drive.google.com/uc?id=17XfesauEIBESFvGdOgQg4neWxHTVRJYP', compression='gzip')
-    cy3 = pd.read_pickle('https://drive.google.com/uc?id=1ln9nPdZAI0d8dj2qa_w0Lc0Yma1HzqlS', compression='gzip')
-    cy4 = pd.read_pickle('https://drive.google.com/uc?id=1uv_Pt2bOYTMfoUWrnFfUErjJY7NIVy7S', compression='gzip')
-    cy = pd.concat([cy1, cy2], ignore_index=True, axis=0)
-    cy = pd.concat([cy, cy3], ignore_index=True, axis=0)
-    cy = pd.concat([cy, cy4], ignore_index=True, axis=0)
-    return cy
-
-@app.get("/api/model_regression")
-async def put_model(db:str, yyyy:str, mm:str, dd:str):
-    response = save_model_to_db(db, yyyy, mm, dd)
-    if response:
-        return response
-    raise HTTPException(400, f"Something went wrong")
+# @app.get("/api/model_regression")
+# async def put_model(db:str, yyyy:str, mm:str, dd:str):
+#     response = save_model_to_db(db, yyyy, mm, dd)
+#     if response:
+#         return response
+#     raise HTTPException(400, f"Something went wrong")
 
 @app.get("/api/model_regression_result")
 async def put_model(db:str):
@@ -259,14 +246,14 @@ async def clean_csv(db:str, id_inventory:str, id_payment:str, year:str, month:st
     raise HTTPException(400, f"Something went wrong")
 
 
-@app.get("/api/timeseries")
-async def timeseries_model(db:str, yyyy:str, mm:str, dd:str):
-    cy = await read_cy_csv()
-    oa = await read_oa_csv()
-    response = save_timeseries_to_db(db, cy, oa, yyyy, mm, dd)
-    if response:
-        return response
-    raise HTTPException(400, f"Something went wrong")
+# @app.get("/api/timeseries")
+# async def timeseries_model(db:str, yyyy:str, mm:str, dd:str):
+#     cy = await read_cy_csv()
+#     oa = await read_oa_csv()
+#     response = save_timeseries_to_db(db, cy, oa, yyyy, mm, dd)
+#     if response:
+#         return response
+#     raise HTTPException(400, f"Something went wrong")
 
 @app.get("/api/upload_date_log")
 async def upload_date_log(db:str, yyyy:str, mm:str, dd:str):
@@ -348,15 +335,11 @@ async def upload_log(db:str, yyyy:str, mm:str, dd:str):
     
 
 @app.post("/api/train_models")
-async def train_models(db:str, yyyy:str, mm:str, dd:str):
-    responses = []
-    cy = await read_cy_csv()
-    oa = await read_oa_csv()
-    timeseries = await save_timeseries_to_db(db, cy, oa, yyyy, mm, dd)
-    responses.append(timeseries)
-    linreg = await save_model_to_db(db, yyyy, mm, dd)
-    responses.append('Linear Regression has been updated')
-    return responses
+def train_models(db:str, yyyy:str, mm:str, dd:str):
+    result = tasks.train_models_task.delay(db, yyyy, mm, dd)
+    return result.get()
+
+  
 
     
 

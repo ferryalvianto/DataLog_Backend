@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 import pickle
 import time
 
-async def save_model_to_db(db:str, yyyy, mm, dd):
+def save_model_to_db(db:str, yyyy, mm, dd):
     myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = myclient[db]
 

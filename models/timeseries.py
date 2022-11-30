@@ -6,7 +6,7 @@ import pymongo
 import pickle
 from datetime import datetime, timedelta
 
-async def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
+def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
     col = mydb['df_sales']
