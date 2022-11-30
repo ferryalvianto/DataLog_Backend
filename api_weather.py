@@ -1,8 +1,6 @@
 import requests
 from models.model import WeatherForecast
 
-
-
 def get_weather():
     city_name = "Vancouver,CA"
     api_key = '26e3ab58c982deb6571267759cd689e1'
