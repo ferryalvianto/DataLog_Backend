@@ -1,1 +1,1 @@
-web: gunicorn -k uvicorn.workers.UvicornWorker hello:app --timeout 180
+web: gunicorn -k uvicorn.workers.UvicornWorker hello:app --timeout 180 --max-requests 1200
