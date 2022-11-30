@@ -15,7 +15,6 @@ def get_weather():
     counter_end = 6
 
     for x in range(0, 5):
-
         temp = 0
         temp_array = []
         temp_max = response[counter_start]["main"]["temp_max"] - 273.15
