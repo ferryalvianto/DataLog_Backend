@@ -1,13 +1,25 @@
-from celery import Celery
+from celery import Celery, shared_task
 import pandas as pd
 import os
-
 from models.timeseries import save_timeseries_to_db
 from models.ml_model_regression import save_model_to_db
+from typing import List
 
-app = Celery("tasks", broker='redis://localhost:6379/0', backend='redis://localhost')
-app.conf.update(broker_url=os.environ['REDIS_URL'],
-                result_backend=os.environ['REDIS_URL'])
+
+# @shared_task(bind=True,autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+#              name='universities:get_all_universities_task')
+# def get_all_universities_task(self, countries: List[str]):
+#     data: dict = {}
+#     for cnt in countries:
+#         data.update(universities.get_all_universities_for_country(cnt))
+#     return data
+
+
+# @shared_task(bind=True,autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
+#              name='university:get_university_task')
+# def get_university_task(self, country: str):
+#     university = universities.get_all_universities_for_country(country)
+#     return university
 
 def read_oa_csv():
     oa1 = pd.read_pickle('https://drive.google.com/uc?id=1l7qRdYza9LF80UZrKDJ7ucmdNYMBPvbB', compression='gzip')
@@ -29,12 +41,12 @@ def read_cy_csv():
     cy = pd.concat([cy, cy4], ignore_index=True, axis=0)
     return cy
 
-@app.task (name='tasks.add')
-def add(x, y):
+@shared_task(name='tasks:add')
+def add( x:int, y:int):
     return x + y
 
-@app.task (name='tasks.train_models_task')
-def train_models_task(db:str, yyyy:str, mm:str, dd:str):
+@shared_task(name='tasks:train_models_task')
+def train_models_task( db:str, yyyy:str, mm:str, dd:str):
     responses = []
     cy = read_cy_csv()
     oa = read_oa_csv()
