@@ -47,7 +47,7 @@ app.add_middleware(
 #-------------------------------------------#
 # authentication
 
-@app.get('/')
+@app.get('/hi')
 def test():
     return 'hi'
 
