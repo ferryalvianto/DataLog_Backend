@@ -2,10 +2,10 @@ import motor.motor_asyncio
 from models.model import Revenue
 from models.model import RevenueMaxDate
 
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
 #fetch all revenues
 async def fetch_all_revenue(db:str):
+    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     database = client[db]
     collection = database.df_sales
 
@@ -44,6 +44,7 @@ async def fetch_all_revenue(db:str):
     
 #detch revenue by range
 async def fetch_by_range_revenue(db, start_date,end_date):
+    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     database = client[db]
     collection = database.Revenue
 

@@ -41,8 +41,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
-
 # APIs
 
 #-------------------------------------------#
@@ -63,6 +61,7 @@ async def get_dbs():
 
 @app.post('/token', response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     db = form_data.client_id
     mydb = client[db]
     mycol = mydb["users"]
@@ -94,6 +93,7 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 
 @app.put("/api/users/{username}", response_model=User)
 async def update_user(username: str, db:str, user: User):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
     mycol = mydb["users"]
     cursor = mycol.find({}, {'_id': 0})
@@ -262,6 +262,7 @@ async def timeseries_model(db:str, yyyy:str, mm:str, dd:str):
 
 @app.get("/api/upload_date_log")
 async def upload_date_log(db:str, yyyy:str, mm:str, dd:str):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
     col = mydb['df_sales']
     results = col.find({"Date": yyyy+'-'+mm+'-'+dd})
@@ -275,6 +276,7 @@ async def upload_date_log(db:str, yyyy:str, mm:str, dd:str):
 
 @app.get("/api/upload_log")
 async def upload_log(db:str, yyyy:str, mm:str, dd:str):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
     col = mydb['df_sales']
     inptstr = yyyy+'-'+mm+'-'+dd

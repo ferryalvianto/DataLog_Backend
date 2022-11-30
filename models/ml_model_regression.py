@@ -5,10 +5,8 @@ from sklearn.model_selection import train_test_split
 import pickle
 import time
 
-myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
-
-
 def save_model_to_db(db:str, yyyy, mm, dd):
+    myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = myclient[db]
 
     if db == 'BeFresh':
@@ -86,6 +84,7 @@ def load_saved_model_from_db(db, weather_data):
     json_data = {}
     
     #fetch model in mongodb
+    myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = myclient[db]
     mycon = mydb[dbconnection]
     data = mycon.find({'name': model_name})
@@ -150,6 +149,7 @@ def load_saved_model_from_db(db, weather_data):
 
 
 def load_saved_model_from_db_with_category(db, weather_data, category):
+    myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     dbconnection='regression_models'
     model_name = "my_linear_model"
 

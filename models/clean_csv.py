@@ -2,10 +2,9 @@ import numpy as np
 import pandas as pd
 import pymongo
 
-client = pymongo.MongoClient(
-    'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
-
 def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str, day: str):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+
     url = 'https://drive.google.com/uc?id=' + id_inventory
     df = pd.read_csv(url)
 
