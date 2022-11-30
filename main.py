@@ -1,18 +1,34 @@
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from datetime import timedelta
+from datetime import timedelta,datetime
 from fastapi.encoders import jsonable_encoder
 
+from models.timeseries import save_timeseries_to_db
+from models.clean_csv import cleancsv
 from models.model import Sentiments, User, UserInDB, Token
 from models.ml_model_regression import save_model_to_db, load_saved_model_from_db, load_saved_model_from_db_with_category
 from authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db, client, pwd_context
 from api_weather import get_weather
 
 from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
-from dbs.db_revenue import fecth_by_range_revenue, fetch_all_revenue
-from dbs.db_sentiments import create_sentiments,fecth_by_range_sentiments,fetch_all_sentiments
+from dbs.db_revenue import fetch_by_range_revenue, fetch_all_revenue
+from dbs.db_sentiments import create_sentiments,fetch_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
 from dbs.db_heatmap import fetch_all_ht_category, fetch_date_range_ht_category
+
+import pandas as pd
+import dask
+import dask.dataframe as dd
+import pymongo
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
+
+import pandas as pd
+import dask
+import dask.dataframe as dd
+import pymongo
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
 
 # an HTTP-specific exception class  to generate exception information
 from fastapi.middleware.cors import CORSMiddleware
@@ -32,6 +48,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
 # APIs
 
@@ -131,7 +149,7 @@ async def get_sentiment():
 
 @app.get("/api/sentiments/")
 async def get_sentiment_by_range(start_date: str, end_date: str):
-    response = await fecth_by_range_sentiments(start_date, end_date)
+    response = await fetch_by_range_sentiments(start_date, end_date)
     if response:
         return response
     raise HTTPException(
@@ -151,14 +169,14 @@ async def post_todo(sentiments: Sentiments):
 
 
 @app.get("/api/revenues")
-async def get_revenues():
-    response = await fetch_all_revenue()
+async def get_revenues(db:str):
+    response = await fetch_all_revenue(db)
     return response
 
 
 @app.get("/api/revenues/")
-async def get_revenue_by_range(start_date: str, end_date: str):
-    response = await fecth_by_range_revenue(start_date, end_date)
+async def get_revenue_by_range(db:str, start_date: str, end_date: str):
+    response = await fetch_by_range_revenue(db, start_date, end_date)
     if response:
         return response
     raise HTTPException(
@@ -166,23 +184,23 @@ async def get_revenue_by_range(start_date: str, end_date: str):
 
 
 @app.get("/api/quantity_forecast")
-async def put_model():
-    response = load_saved_model_from_db(get_weather())
+async def put_model(db:str):
+    response = load_saved_model_from_db(db, get_weather())
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
 
 @app.get("/api/quantity_forecast/")
-async def put_model_cat(category: str):
-    response = load_saved_model_from_db_with_category(get_weather(),category)
+async def put_model_cat(db:str, category: str):
+    response = load_saved_model_from_db_with_category(db, get_weather(),category)
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
 
 
 @app.get("/api/revenue_forecast")
-async def get_revenue_forecast():
-    response = await fetch_latest_forecast_revenues()
+async def get_revenue_forecast(db:str):
+    response = await fetch_latest_forecast_revenues(db)
     return response
 
 #-------------------------------------------#
@@ -196,32 +214,65 @@ def get_weather_forecast():
 #-------------------------------------------#
 # model api
 
+async def read_oa_csv():
+    oa_urls = ['https://drive.google.com/uc?id=1pdMJvWVmV8KLwpIkfBmD0yLZd1Zq9Hou',
+            'https://drive.google.com/uc?id=1sd7UEHk8fhHk52W61aupnnxRBnP2cTxg',
+            'https://drive.google.com/uc?id=11XGlbZknAqXxhB3D-ZDGC7kBWIYG-wLv',
+            'https://drive.google.com/uc?id=1XBsq2mwjpzppivuODh8Z8imAVmLoYgjx']
+    oa_dfs = [dask.delayed(pd.read_csv)(url) for url in oa_urls]
+    oa = dd.from_delayed(oa_dfs)
+    return oa
+
+async def read_cy_csv():
+    cy_urls= ['https://drive.google.com/uc?id=1loqBDfWZQ96Z3-KoJSSzNb0mngGo-YQf',
+            'https://drive.google.com/uc?id=1FMg0L0ia5pRqQzctqVQDJFxFQyXTPf6y',
+            'https://drive.google.com/uc?id=1o0cvR0ZrhyA3Ekeoy9HF2J8IRamqeRb-',
+            'https://drive.google.com/uc?id=1_sPA-bnAWnkAvNUGljJoTxXPaNZiLI_B']
+    cy_dfs = [dask.delayed(pd.read_csv)(url) for url in cy_urls]
+    cy = dd.from_delayed(cy_dfs)
+    return cy
 
 @app.get("/api/model_regression")
-async def put_model():
-    response = save_model_to_db()
+async def put_model(db:str, yyyy:str, mm:str, dd:str):
+    response = save_model_to_db(db, yyyy, mm, dd)
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
 
 @app.get("/api/model_regression_result")
-async def put_model():
-    response = load_saved_model_from_db(get_weather())
+async def put_model(db:str):
+    response = load_saved_model_from_db(db, get_weather())
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
-
 
 #get forecast by category  
 @app.get("/api/model_regression_result/")
-async def put_model_cat(category: str):
-    response = load_saved_model_from_db_with_category(get_weather(),category)
+async def put_model_cat(db:str, category: str):
+    response = load_saved_model_from_db_with_category(db, get_weather(),category)
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
 
+@app.get("/api/clean_csv")
+async def clean_csv(db:str, id_inventory:str, id_payment:str, year:str, month:str, day:str):
+    if db == 'BeFresh':
+        return cleancsv(db, id_inventory, id_payment, year, month, day)
+    elif db == 'Datalog':
+        return 'Not available on the DataLog database'
+    raise HTTPException(400, f"Something went wrong")
 
-#get heatmap location and quantity
+
+@app.get("/api/timeseries")
+async def timeseries_model(db:str, yyyy:str, mm:str, dd:str):
+    cy = await read_cy_csv()
+    oa = await read_oa_csv()
+    response = save_timeseries_to_db(db, cy, oa, yyyy, mm, dd)
+    if response:
+        return response
+    raise HTTPException(400, f"Something went wrong")
+
+    #get heatmap location and quantity
 @app.get("/api/heatmap")
 async def get_heatmap():
     response = await fetch_all_ht_category()

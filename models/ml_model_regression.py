@@ -1,18 +1,20 @@
 import pymongo
 import pandas as pd
-import numpy as np
-from sklearn import datasets
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 import pickle
 import time
 
-def save_model_to_db():
+myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
-    myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/DataLog')
-    mydb = myclient["DataLog"]
-    #collection for transaction
-    mycol = mydb["Order_Item_Transaction"]
+
+def save_model_to_db(db:str, yyyy, mm, dd):
+    mydb = myclient[db]
+
+    if db == 'BeFresh':
+        mycol = mydb["df_sales"]
+    else:
+        mycol = mydb["Order_Item_Transaction"]
 
     transaction_list = []
 
@@ -22,9 +24,16 @@ def save_model_to_db():
     df = pd.DataFrame(transaction_list)
 
    #only getting relevant Columns for Forecasting Quantity
-    rel_col = ["Category","Quantity", "Date","Temperature", "Min_Temp_C_", "Max_Temp_C_", "Year"]
+    if db == 'BeFresh':
+        rel_col = ["Category","Quantity", "Date","Temperature", "Min_Temp_C_", "Max_Temp_C_", "year"]
+    else:
+        rel_col = ["Category","Quantity", "Date","Temperature", "Min_Temp_C_", "Max_Temp_C_", "Year"]
+
     df = df[rel_col]
 
+    if 'year' in df.columns:
+        df.rename(columns={'year': 'Year'}, inplace=True)
+        
     #creating column for daily quantity sold for a product
     df["daily_quantity_sold"] = df.groupby(['Category', 'Date'])['Quantity'].transform('sum')
 
@@ -41,7 +50,6 @@ def save_model_to_db():
     X = df.drop("daily_quantity_sold", axis=1)
     Y = df.daily_quantity_sold
 
-    
     linear_model = LinearRegression()
     xtrain, xtest, ytrain, ytest = train_test_split(X, Y, test_size=0.20, random_state=0)
     linear_model.fit(xtrain,ytrain)
@@ -60,9 +68,9 @@ def save_model_to_db():
     #creating collection
     mycon = mydb[dbconnection]
     info = mycon.insert_one({ model_name: pickled_model, 
-                             'name': model_name, 
-                            'created_time': time.time()})
-    
+                            'name': model_name, 
+                            'created_time': time.time(),
+                            'latest_date_in_model': yyyy+'-'+mm+'-'+dd})
     
     details = {
         'model_name' : model_name,
@@ -71,25 +79,11 @@ def save_model_to_db():
     return details
 
 
-
-
-
-
-
-def load_saved_model_from_db(weather_data):
-
-
-    client= 'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test'
-    db = 'DataLog'
+def load_saved_model_from_db(db, weather_data):
     dbconnection='regression_models'
     model_name = "my_linear_model"
 
-    
     json_data = {}
-    
-    #saving model to mongoDB
-    #creating connection
-    myclient = pymongo.MongoClient(client)
     
     #fetch model in mongodb
     mydb = myclient[db]
@@ -103,18 +97,17 @@ def load_saved_model_from_db(weather_data):
 
     linear_fetch = pickle.loads(pickled_model)
    
-
-
     #fetch category mongodb
+    if db == 'BeFresh':
+        dbconnection_Order_Item_Transaction = "df_sales"
+    else:
+        dbconnection_Order_Item_Transaction = "Order_Item_Transaction"
 
-    dbconnection_Order_Item_Transaction = "Order_Item_Transaction"
     mycon = mydb[dbconnection_Order_Item_Transaction]
     Categories = mycon.distinct("Category")
     Categories.pop(0)
 
     df = pd.DataFrame()
-
-  
 
     df["Temperature"] = ""
     df["Min_Temp_C_"] = ""
@@ -144,7 +137,6 @@ def load_saved_model_from_db(weather_data):
 
     df= df.astype("int32")
 
-
     prediction = linear_fetch.predict(df)
 
     prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
@@ -152,29 +144,16 @@ def load_saved_model_from_db(weather_data):
     prediction['Category'] = df_orig.Category
     prediction['Date'] = df_orig.Year
 
-        
-
     prediction = prediction.to_dict("records")
 
     return prediction
 
-    
-    
 
-def load_saved_model_from_db_with_category(weather_data, category):
-
-
-    client= 'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test'
-    db = 'DataLog'
+def load_saved_model_from_db_with_category(db, weather_data, category):
     dbconnection='regression_models'
     model_name = "my_linear_model"
 
-    
     json_data = {}
-    
-    #saving model to mongoDB
-    #creating connection
-    myclient = pymongo.MongoClient(client)
     
     #fetch model in mongodb
     mydb = myclient[db]
@@ -185,15 +164,14 @@ def load_saved_model_from_db_with_category(weather_data, category):
         json_data = i
 
     pickled_model = json_data[model_name]   
-
     linear_fetch = pickle.loads(pickled_model)
-   
-
 
     #fetch category mongodb
+    if db == 'BeFresh':
+        mycon = mydb["df_sales"]
+    else:
+        mycon = mydb["Order_Item_Transaction"]
 
-    dbconnection_Order_Item_Transaction = "Order_Item_Transaction"
-    mycon = mydb[dbconnection_Order_Item_Transaction]
     Categories = mycon.distinct("Category")
     Categories.pop(0)
 
@@ -205,12 +183,9 @@ def load_saved_model_from_db_with_category(weather_data, category):
     df["Year"] = ""
     df["Category"] = ""
 
-
     #creating columns for Categories
     for column in Categories:
         df[column] = column
-
-   
 
     for column in Categories:
         for i in range(len(weather_data)):
@@ -220,29 +195,20 @@ def load_saved_model_from_db_with_category(weather_data, category):
             'Year': weather_data[i].dt_txt, 'Category': column
             }, ignore_index=True)
 
-    
     df.fillna(0, inplace=True)
-
     df_orig = df.copy()
     df.drop("Category", axis=1, inplace=True)
-
     df["Year"] = df["Year"].apply(lambda x: x[0:4])
-
     df= df.astype("int32")
 
-
     prediction = linear_fetch.predict(df)
-
     prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
-    
     prediction['Category'] = df_orig.Category
     prediction['Date'] = df_orig.Year
     prediction = prediction.loc[prediction.Category==category]
     prediction = prediction.to_dict("records")
 
-    
     return prediction
     
     
-
 
