@@ -57,5 +57,5 @@ def train_models_task( db:str, yyyy:str, mm:str, dd:str):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     client[db]['training_log'].update_one({'flag': 'training_log' }, { "$set": { 'isDone': True } })
     client[db]['training_log'].update_one({'flag': 'training_log' }, { "$set": { 'results': responses } })
-    client[db]['training_log'].update_one({'flag': 'training_log' }, { "$set": { 'latest_date_in_model': '2022-11-27' } })
+    client[db]['training_log'].update_one({'flag': 'training_log' }, { "$set": { 'latest_date_in_model': yyyy+'-'+mm+'-'+dd } })
     return responses
