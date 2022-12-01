@@ -338,12 +338,12 @@ def train_models(db:str, yyyy:str, mm:str, dd:str):
 @router.get('/api/get_training')
 def get_training_status(db:str):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
-    collection = client['BeFresh']['training_log']
+    collection = client[db]['training_log']
     for x in collection.find({ "flag": "training_log" },{ "_id": 0 }):
         if x['isDone'] == True:
             response = x['results']
             collection.update_one({'flag': 'training_log' }, { "$set": { 'isDone': False } })
-            return response
+            return '1', response
         else:
             return '0'
 
