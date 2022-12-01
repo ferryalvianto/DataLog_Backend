@@ -335,4 +335,16 @@ def train_models(db:str, yyyy:str, mm:str, dd:str):
     task = train_models_task.delay(db, yyyy, mm, dd)
     return JSONResponse({"task_id": task.id})
 
+@router.get('/api/get_training')
+def get_training_status(db:str):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+    collection = client['BeFresh']['training_log']
+    for x in collection.find({ "flag": "training_log" },{ "_id": 0 }):
+        if x['isDone'] == True:
+            response = x['results']
+            collection.update_one({'flag': 'training_log' }, { "$set": { 'isDone': False } })
+            return response
+        else:
+            return '0'
+
   

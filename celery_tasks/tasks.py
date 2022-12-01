@@ -1,6 +1,6 @@
-from celery import Celery, shared_task
+from celery import shared_task
 import pandas as pd
-import os
+import pymongo
 from models.timeseries import save_timeseries_to_db
 from models.ml_model_regression import save_model_to_db
 from typing import List
@@ -54,4 +54,8 @@ def train_models_task( db:str, yyyy:str, mm:str, dd:str):
     responses.append(timeseries)
     linreg = save_model_to_db(db, yyyy, mm, dd)
     responses.append('Linear Regression has been updated')
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+    client[db]['training_log'].update_one({'flag': 'training_log' }, { "$set": { 'isDone': True } })
+    client[db]['training_log'].update_one({'flag': 'training_log' }, { "$set": { 'results': responses } })
+    client[db]['training_log'].update_one({'flag': 'training_log' }, { "$set": { 'latest_date_in_model': '2022-11-27' } })
     return responses
