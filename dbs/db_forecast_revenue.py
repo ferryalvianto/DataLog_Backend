@@ -1,8 +1,9 @@
 import motor.motor_asyncio
 
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
 
 async def fetch_latest_forecast_revenues(db:str):
+    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
+
     database = client[db]
     collection = database.revenue_forecast
     revenues = []

@@ -1,8 +1,6 @@
 import requests
 from models.model import WeatherForecast
 
-
-
 def get_weather():
     city_name = "Vancouver,CA"
     api_key = '26e3ab58c982deb6571267759cd689e1'
@@ -17,7 +15,6 @@ def get_weather():
     counter_end = 6
 
     for x in range(0, 5):
-
         temp = 0
         temp_array = []
         temp_max = response[counter_start]["main"]["temp_max"] - 273.15

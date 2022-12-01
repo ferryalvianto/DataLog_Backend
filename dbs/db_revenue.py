@@ -1,18 +1,15 @@
 import motor.motor_asyncio
-from models.model import Revenue
-from models.model import RevenueMaxDate
 
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
 
 #fetch all revenues
-async def fetch_all_revenue(db:str):
-    database = client[db]
-    collection = database.df_sales
-
+async def fetch_all_revenue(db):
     revenues = []
-    # cursor = collection.find({})
-    max_date = collection.find().sort([("Date",-1)]).limit(1)
+    mydb = client[db]
+    collection =mydb['wastage']
 
+
+    max_date = collection.find().sort([("Date",-1)]).limit(1)
     async for maxDate in max_date:
         maxDate
 

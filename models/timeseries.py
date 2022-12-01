@@ -5,11 +5,9 @@ from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 import pymongo
 import pickle
 from datetime import datetime, timedelta
-from prophet.serialize import model_to_json, model_from_json
-
-client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
 def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
     col = mydb['df_sales']
     results_oa = col.find({"Establishment":0},{"_id": 0,"Date":1, "dailyRevenue":1})
@@ -38,9 +36,6 @@ def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
 
     oa = oa.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
     cy = cy.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
-
-    cy = cy.compute()
-    oa = oa.compute()
 
     oa['Date'] = pd.to_datetime(oa['Date'])
     cy['Date'] = pd.to_datetime(cy['Date'])
