@@ -317,6 +317,177 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
 
     steps_l = list(np.arange(0, len(df), 5000)) + [len(df)]
 
+    ####-----______________HEATMAP-----------####
+
+    def convert_HT_cat(category,product_name):
+    
+        #produce
+        if(category=='Produce'): 
+        
+            if ('Avocado' in product_name):
+                return 'Avocados'
+            elif('Banana' in product_name):
+                return 'Bananas'
+            elif (('Peppers' in product_name)|('Tomatoes' in product_name) | ('Tomatillos' in product_name) ):
+                return 'Peppers and Tomatoes'
+            elif (('Potatoes' in product_name) | ('Yams' in product_name) | ('Onion' in product_name) ):
+                return 'Tubers and Onions'
+            elif (('Apples' in product_name) | ('Oranges' in product_name) | 
+                                        ('Grapefruit' in product_name) | ('Lemons' in product_name) | 
+                                        ('Tangelo' in product_name) |  ('Tangerine' in product_name)):
+                return 'Apples and Citruses'
+            elif (('Basil' in product_name) | ('Cilantro' in product_name) | 
+                                        ('Dill' in product_name) | ('Mint' in product_name) | 
+                                        ('Parsley' in product_name) |  ('Rosemary' in product_name) | 
+                                        ('Sage' in product_name) | ('Thyme' in product_name) ):
+                return 'Herbs'
+
+            else:
+                return 'Produce'
+            
+        #Coffee Bar
+        elif(category=='Coffee Bar'):
+            return 'Coffee Bar'
+        
+        #Deli
+        elif(category=='Deli'):
+            return 'Deli'
+        
+        #Dairy
+        elif(category=='Dairy'):
+            if('Ice Cream' in product_name):
+                return 'Ice Cream'
+            else:
+                return 'Dairy'
+        
+        #Snacks
+        elif(category=='Snacks'):
+            return 'Chips'
+        
+        #Heat & Eat
+        elif(category=='Heat & Eat'):
+            if('Soup' in product_name):
+                return 'Soups'
+        
+        #
+        
+        else:
+            return 'Others'
+        
+
+    #assigning value to HT_Category
+
+    df["HT_Category"] = df.apply(lambda x: convert_HT_cat(x.Category, x.Product_Name), axis=1)
+
+    #creating a function to assign coordinates
+
+    def assign_x_coordinate(ht_cat):
+        if(ht_cat=='Coffee Bar'):
+            return 541
+        elif(ht_cat =='Seeds'):
+            return 47
+        elif(ht_cat=='Avocados'):
+            return 69
+        elif(ht_cat=='Cooler 1'):
+            return 69
+        elif(ht_cat=='Cooler 2'):
+            return 69
+        elif(ht_cat=='Bananas'):
+            return 69
+        elif(ht_cat=='Cards'):
+            return 180
+        elif(ht_cat=='Peppers and Tomatoes'):
+            return 409
+        elif(ht_cat=='Tubers and Onions'):
+            return 409   
+        elif(ht_cat=='Apples and Citruses'):
+            return 409
+        elif(ht_cat=='Isle 1'):
+            return 1020
+        elif(ht_cat=='Isle 2'):
+            return 1020
+        elif(ht_cat=='Isle 3'):
+            return 1020
+        elif(ht_cat=='Chips'):
+            return 1525
+        elif(ht_cat=='Herbs'):
+            return 450
+        elif(ht_cat=='Produce'):
+            return 255
+        elif(ht_cat=='Soups'):
+            return 630
+        elif(ht_cat=='Deli'):
+            return 790
+        elif(ht_cat=='Dairy'):
+            return 905
+        elif(ht_cat=='Vegan'):
+            return 1060
+        elif(ht_cat=='Freezer'):
+            return 1250
+        elif(ht_cat=='Ice Cream'):
+            return 1440
+        else:
+            return 11
+    
+    def assign_y_coordinate(ht_cat):
+        if(ht_cat=='Coffee Bar'):
+            return 54
+        elif(ht_cat =='Seeds'):
+            return 348
+        elif(ht_cat=='Avocados'):
+            return 741
+        elif(ht_cat=='Cooler 1'):
+            return 875
+        elif(ht_cat=='Cooler 2'):
+            return 1025
+        elif(ht_cat=='Bananas'):
+            return 1200
+        elif(ht_cat=='Cards'):
+            return 480    
+        elif(ht_cat=='Peppers and Tomatoes'):
+            return 480
+        elif(ht_cat=='Tubers and Onions'):
+            return 740     
+        elif(ht_cat=='Apples and Citruses'):
+            return 1020
+        elif(ht_cat=='Isle 1'):
+            return 480
+        elif(ht_cat=='Isle 2'):
+            return 740
+        elif(ht_cat=='Isle 3'):
+            return 1020
+        elif(ht_cat=='Chips'):
+            return 520
+        elif(ht_cat=='Herbs'):
+            return 1220
+        elif(ht_cat=='Produce'):
+            return 1220
+        elif(ht_cat=='Soups'):
+            return 1220
+        elif(ht_cat=='Deli'):
+            return 1220
+        elif(ht_cat=='Dairy'):
+            return 1220
+        elif(ht_cat=='Vegan'):
+            return 1220
+        elif(ht_cat=='Freezer'):
+            return 1220
+        elif(ht_cat=='Ice Cream'):
+            return 1220
+        else:
+            return 11
+
+    df['x_coor'] = df.HT_Category.apply(lambda x: assign_x_coordinate(x))
+    df['y_coor'] = df.HT_Category.apply(lambda x: assign_y_coordinate(x))
+
+
+    
+    ################################################
+
+
+
+
+
     for start, end in zip(steps_l, steps_l[1:]):
         client[db]['df_sales'].insert_many(
             df.iloc[start:end].to_dict(orient="records"))
