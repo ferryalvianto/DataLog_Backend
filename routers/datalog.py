@@ -342,9 +342,15 @@ def get_training_status(db:str):
     for x in collection.find({ "flag": "training_log" },{ "_id": 0 }):
         if x['isDone'] == True:
             response = x['results']
-            collection.update_one({'flag': 'training_log' }, { "$set": { 'isDone': False } })
             return '1', response
         else:
             return '0'
+
+@router.post('/api/update_training_log')
+def update_training_log(db:str):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+    collection = client[db]['training_log']
+    collection.update_one({'flag': 'training_log' }, { "$set": { 'isDone': False } })
+    return '1'
 
   
