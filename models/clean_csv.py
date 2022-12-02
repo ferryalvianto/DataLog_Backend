@@ -376,7 +376,7 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
 
     #assigning value to HT_Category
 
-    df["HT_Category"] = df.apply(lambda x: convert_HT_cat(x.Category, x.Product_Name), axis=1)
+    df["HT_Category"] = df.apply(lambda x: convert_HT_cat(x.Category, x.Name), axis=1)
 
     #creating a function to assign coordinates
 
