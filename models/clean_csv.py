@@ -315,7 +315,6 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
         avg = round(avg.iloc[0], 2)
         df['averageGasPrice'] = df['averageGasPrice'].fillna(avg)
 
-    steps_l = list(np.arange(0, len(df), 5000)) + [len(df)]
 
     ####-----______________HEATMAP-----------####
 
@@ -481,10 +480,14 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     df['y_coor'] = df.HT_Category.apply(lambda x: assign_y_coordinate(x))
 
 
+    df["test"] = "sdada"
     
     ################################################
 
 
+
+
+    steps_l = list(np.arange(0, len(df), 5000)) + [len(df)]
 
 
 

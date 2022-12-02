@@ -4,6 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 import pickle
 import time
+import numpy as np
 
 def save_model_to_db(db:str, yyyy, mm, dd):
     myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
@@ -210,5 +211,87 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
 
     return prediction
     
-    
 
+#table
+def load_saved_model_from_db_quantity_forecast_table(db, weather_data):
+    dbconnection='regression_models'
+    model_name = "my_linear_model"
+
+    json_data = {}
+    
+    #fetch model in mongodb
+    myclient = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+    mydb = myclient[db]
+    mycon = mydb[dbconnection]
+    data = mycon.find({'name': model_name})
+        
+    for i in data:
+        json_data = i
+
+    pickled_model = json_data[model_name]   
+
+    linear_fetch = pickle.loads(pickled_model)
+   
+    #fetch category mongodb
+    if db == 'BeFresh':
+        dbconnection_Order_Item_Transaction = "df_sales"
+    else:
+        dbconnection_Order_Item_Transaction = "Order_Item_Transaction"
+
+    mycon = mydb[dbconnection_Order_Item_Transaction]
+    Categories = mycon.distinct("Category")
+    Categories.pop(0)
+
+    df = pd.DataFrame()
+
+    df["Temperature"] = ""
+    df["Min_Temp_C_"] = ""
+    df["Max_Temp_C_"] = ""
+    df["Year"] = ""
+    df["Category"] = ""
+
+      #creating columns for Categories
+    for column in Categories:
+        df[column] = column
+
+    for column in Categories:
+        for i in range(len(weather_data)):
+            df = df.append({column:1, 'Temperature': weather_data[i].temp_avg
+            , 
+            'Min_Temp_C_':weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
+            'Year': weather_data[i].dt_txt, 'Category': column
+            }, ignore_index=True)
+
+    
+    df.fillna(0, inplace=True)
+
+    df_orig = df.copy()
+    df.drop("Category", axis=1, inplace=True)
+
+    df["Year"] = df["Year"].apply(lambda x: x[0:4])
+
+    df= df.astype("int32")
+
+    prediction = linear_fetch.predict(df)
+
+    prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
+    
+    prediction['Category'] = df_orig.Category
+    prediction['Date'] = df_orig.Year
+
+    Dates = prediction.Date.unique()
+    
+ 
+    prediction_test_transpose= prediction.predicted_quantity
+
+    prediction_excel = pd.DataFrame(prediction_test_transpose.values.reshape(-1,5), columns=Dates)
+
+    category_list = np.array(Categories)
+
+    prediction_excel.insert(0,'Categories', category_list)
+
+
+    prediction_excel = prediction_excel.to_dict("records") 
+
+
+    return prediction_excel
