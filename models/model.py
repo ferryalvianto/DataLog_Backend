@@ -66,3 +66,9 @@ class ML_Model(BaseModel):
 class RevenueMaxDate(BaseModel):
     Date: str
     revenue: int
+
+class General_Products(BaseModel):
+    Category: str
+    Date: str
+    Name: str
+    Quantity: int
