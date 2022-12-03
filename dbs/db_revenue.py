@@ -1,5 +1,4 @@
 import motor.motor_asyncio
-from models.model import Revenue
 import pymongo
 import pandas as pd
 
@@ -9,7 +8,7 @@ def fetch_all_revenue(db:str, cy ,oa):
     database = client[db]
     collection = database.df_sales
     
-    for max in collection.find({'$and':[{"Establishment":0}, {"Establishment":1}]}):
+    for max in collection.find().sort([("ymd",-1)]).limit(1):
         maxDate = max
 
     max_month = int(maxDate["Date"][5:7])
@@ -47,16 +46,12 @@ def fetch_all_revenue(db:str, cy ,oa):
     return df_all
     
 #detch revenue by range
-def fetch_by_range_revenue(db, start_date,end_date):
-    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
-    database = client[db]
-    collection = database.Revenue
-
-    revenues = []
-    cursor = collection.find({'ymd': { "$gte": start_date, "$lte":  end_date}}) 
-    for document in cursor:
-        revenues.append(Revenue(**document))
-    return revenues
+def fetch_by_range_revenue(db, cy, oa, start_date,end_date):
+    df = fetch_all_revenue(db, cy, oa)
+    df = pd.DataFrame.from_dict(df)
+    df = df.loc[(df['Date'] >= start_date) & (df['Date'] <= end_date)]
+    df = df.to_dict(orient='records')
+    return df
 
 
    

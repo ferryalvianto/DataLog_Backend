@@ -174,8 +174,10 @@ def get_revenues(db:str):
 
 
 @router.get("/api/revenues/")
-async def get_revenue_by_range(db:str, start_date: str, end_date: str):
-    response = await fetch_by_range_revenue(db, start_date, end_date)
+def get_revenue_by_range(db:str, start_date: str, end_date: str):
+    cy = read_cy_csv()
+    oa = read_oa_csv()
+    response = fetch_by_range_revenue(db, cy, oa, start_date, end_date)
     if response:
         return response
     raise HTTPException(
