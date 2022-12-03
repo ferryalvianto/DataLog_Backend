@@ -17,7 +17,7 @@ async def fetch_general_products(db:str):
         {
             '$project':
             {
-                 "Quantity": "$Quantity",
+                 "Quantity": {"$sum":"$Quantity"},
                  "Category": "$Category",
                  "Name": "$Name",
                  "Date": "$Date"
@@ -46,18 +46,19 @@ async def fetch_products_by_date(db,start_date,end_date):
 
     cursor = collection.aggregate([
         {
+            "$project":
+            {
+                "Name": "$Name",
+                "Category": "$Category",
+                "Quantity": {"$sum":"$Quantity"},
+                "Date": "$Date"
+            }
+
+        },
+        {
             "$match":
             {
                 "Date": {"$gte": start_date, "$lte": end_date}
-            }
-        },
-        {
-            "$group":
-            {
-                "_id": "$Name",
-                "Category": {"$first":"$Category"},
-                "Date": {"$first":"$Date"},
-                "Quantity": {"$sum":"$Quantity"}   
             }
         },
         {
@@ -69,5 +70,5 @@ async def fetch_products_by_date(db,start_date,end_date):
     ])
 
     async for document in cursor:
-        products.append(document)
+        products.append(General_Products(**document))
     return products
