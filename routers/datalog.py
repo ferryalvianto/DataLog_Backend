@@ -172,8 +172,8 @@ def get_revenues(db:str):
     return df
 
 @router.get("/api/revenues/")
-async def get_revenue_by_range(start_date: str, end_date: str):
-    response = await fecth_by_range_revenue(start_date, end_date)
+async def get_revenue_by_range(db:str, start_date: str, end_date: str):
+    response = await fecth_by_range_revenue(db, start_date, end_date)
     if response:
         return response
     raise HTTPException(
@@ -196,8 +196,8 @@ async def put_model_cat(db:str, category: str):
 
 
 @router.get("/api/revenue_forecast")
-def get_revenue_forecast(db:str):
-    response = fetch_latest_forecast_revenues(db)
+async def get_revenue_forecast(db:str):
+    response = await fetch_latest_forecast_revenues(db)
     return response
 
 #-------------------------------------------#

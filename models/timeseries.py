@@ -137,11 +137,13 @@ def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
     forecast_OA = model_holiday1.predict(future_OA)
     forecast_OA = forecast_OA[['ds', 'yhat']][-10:].copy()
     forecast_OA.rename(columns={'ds':'date', 'yhat':'OA_predictedRevenue'}, inplace=True)
+    forecast_OA['date'] = forecast_OA['date'].dt.strftime('%Y-%m-%d')
 
     future_CY = model_holiday.make_future_dataframe(periods=10)
     forecast_CY = model_holiday.predict(future_CY)
     forecast_CY = forecast_CY[['ds', 'yhat']][-10:].copy()
     forecast_CY.rename(columns={'ds':'date', 'yhat':'CY_predictedRevenue'}, inplace=True)
+    forecast_CY['date'] = forecast_CY['date'].dt.strftime('%Y-%m-%d')
 
     preds = forecast_CY.merge(forecast_OA, on='date', how='left')
     preds['latest_date_in_model'] = yyyy+'-'+mm+'-'+dd
