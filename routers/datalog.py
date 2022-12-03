@@ -116,16 +116,16 @@ async def update_user(username: str, db:str, user: User):
 
 
 @router.get("/api/wastage")
-async def get_wastage():
-    response = await fetch_all_wastage()
+async def get_wastage(db:str):
+    response = await fetch_all_wastage(db)
     return response
 
 # wastage by range
 
 
 @router.get("/api/wastage/")
-async def get_by_range_wastage(start_date: str, end_date: str):
-    response = await fetch_date_range_wastage(start_date, end_date)
+async def get_by_range_wastage(db:str, start_date: str, end_date: str):
+    response = await fetch_date_range_wastage(db, start_date, end_date)
     if response:
         return response
     raise HTTPException(
