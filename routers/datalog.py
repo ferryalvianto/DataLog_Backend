@@ -11,6 +11,7 @@ from fastapi.encoders import jsonable_encoder
 from models.clean_csv import cleancsv
 from models.model import Sentiments, User, UserInDB, Token
 from models.ml_model_regression import load_saved_model_from_db, load_saved_model_from_db_with_category
+from models.nps_score import nps_score
 from services.authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db
 from services.api_weather import get_weather
 
@@ -371,3 +372,13 @@ async def fetch_products_filtered(db:str, start_date: str, end_date: str):
         return response
     raise HTTPException(
         404, f"There are not products to show")
+
+#-------------------------------------------#
+# Net Promoter Score (NPS)
+@router.get("/api/nps_score")
+def fetch_nps_score(db:str):
+    response =  nps_score(db)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"The score is not available")
