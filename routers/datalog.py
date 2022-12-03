@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
 from fastapi import Depends, HTTPException
-from celery_tasks.tasks import train_models_task, add
+from celery_tasks.tasks import train_models_task, add, read_oa_csv
 from config.celery_utils import get_task_info
 
 from fastapi.security import OAuth2PasswordRequestForm
@@ -30,16 +30,14 @@ router = APIRouter(prefix='/datalog', tags=['datalog'], responses={404: {"descri
 
 @router.get('/hi')
 def test():
-    return 'hi'
+    df = read_oa_csv()
+    df = df.to_dict(orient='records')
+    return df
 
 # APIs
 
 #-------------------------------------------#
 # authentication
-
-@router.get('/hi')
-def test():
-    return 'hi'
 
 @router.get('/')
 async def test():
