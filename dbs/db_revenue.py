@@ -2,11 +2,12 @@ import pymongo
 from celery_tasks.tasks import read_cy_csv, read_oa_csv
 import pandas as pd
 
-cy = read_cy_csv()
-oa = read_oa_csv()
-
 #fetch all revenues
 def fetch_all_revenue(db:str):
+
+    cy = read_cy_csv()
+    oa = read_oa_csv()
+
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     database = client[db]
     collection = database.df_sales
