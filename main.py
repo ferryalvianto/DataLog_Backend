@@ -19,7 +19,7 @@ celery = app.celery_app
 
 origins = [
     "http://localhost:3000",
-    # 'https://datalogwebapp.netlify.app'
+    'https://datalogwebapp.netlify.app'
     ]
 
 # what is a middleware?
