@@ -18,6 +18,7 @@ from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
 from dbs.db_revenue import fetch_by_range_revenue, fetch_all_revenue
 from dbs.db_sentiments import create_sentiments,fetch_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
+from dbs.db_generalproducts import fetch_general_products, fetch_products_by_date
 
 import pandas as pd
 import pymongo
@@ -163,6 +164,7 @@ async def post_todo(sentiments: Sentiments):
 
 #-------------------------------------------#
 # revenue
+
 
 @router.get("/api/revenues")
 async def get_revenues(db:str):
@@ -352,4 +354,20 @@ def update_training_log(db:str):
     collection.update_one({'flag': 'training_log' }, { "$set": { 'isDone': False } })
     return '1'
 
-  
+#-------------------------------------------#
+# General Products
+@router.get("/api/general_products")
+async def fetch_products(db:str):
+    response = await fetch_general_products(db)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"There are not products to show")
+
+@router.get("/api/general_products_by_date")
+async def fetch_products_filtered(db:str, start_date: str, end_date: str):
+    response = await fetch_products_by_date(db, start_date, end_date)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"There are not products to show")
