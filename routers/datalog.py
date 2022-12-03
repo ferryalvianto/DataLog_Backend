@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
 from fastapi import Depends, HTTPException
-from celery_tasks.tasks import train_models_task, add, read_oa_csv, read_cy_csv
+from celery_tasks.tasks import train_models_task, add, read_oa_csv
 from config.celery_utils import get_task_info
 
 from fastapi.security import OAuth2PasswordRequestForm
@@ -15,7 +15,7 @@ from services.authentication import get_db_names, create_access_token, get_curre
 from services.api_weather import get_weather
 
 from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
-from dbs.db_revenue import fetch_by_range_revenue, fetch_all_revenue
+from dbs.db_revenue import fetch_by_range_revenue, fetch_revenue_in_db
 from dbs.db_sentiments import create_sentiments,fetch_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
 from dbs.db_generalproducts import fetch_general_products, fetch_products_by_date
@@ -167,17 +167,14 @@ async def post_todo(sentiments: Sentiments):
 
 @router.get("/api/revenues")
 def get_revenues(db:str):
-    cy = read_cy_csv()
-    oa = read_oa_csv()
-    response = fetch_all_revenue(db, cy, oa)
-    return response
+    df = fetch_revenue_in_db(db)
+    df = df.to_dict(orient='records')
+    return df
 
 
 @router.get("/api/revenues/")
-def get_revenue_by_range(db:str, start_date: str, end_date: str):
-    cy = read_cy_csv()
-    oa = read_oa_csv()
-    response = fetch_by_range_revenue(db, cy, oa, start_date, end_date)
+async def get_revenue_by_range(db:str, start_date: str, end_date: str):
+    response = fetch_by_range_revenue(db, start_date, end_date)
     if response:
         return response
     raise HTTPException(
