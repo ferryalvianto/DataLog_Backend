@@ -1,7 +1,7 @@
 import motor.motor_asyncio
+import pymongo
 from models.model import Revenue
 from models.model import RevenueMaxDate
-
 
 #fetch all revenues
 def fetch_all_revenue(db:str):

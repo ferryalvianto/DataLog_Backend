@@ -164,7 +164,6 @@ async def post_todo(sentiments: Sentiments):
 #-------------------------------------------#
 # revenue
 
-
 @router.get("/api/revenues")
 async def get_revenues(db:str):
     response = await fetch_all_revenue(db)
