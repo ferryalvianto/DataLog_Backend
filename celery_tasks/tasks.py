@@ -3,38 +3,31 @@ import pandas as pd
 import pymongo
 from models.timeseries import save_timeseries_to_db
 from models.ml_model_regression import save_model_to_db
-from typing import List
-
-# @shared_task(bind=True,autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-#              name='universities:get_all_universities_task')
-# def get_all_universities_task(self, countries: List[str]):
-#     data: dict = {}
-#     for cnt in countries:
-#         data.update(universities.get_all_universities_for_country(cnt))
-#     return data
-
-
-# @shared_task(bind=True,autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={"max_retries": 5},
-#              name='university:get_university_task')
-# def get_university_task(self, country: str):
-#     university = universities.get_all_universities_for_country(country)
-#     return university
+from pathlib import Path
 
 def read_oa_csv():
-    oa1 = pd.read_pickle('../pkls/OA19.pkl', compression='gzip')
-    oa2= pd.read_pickle('../pkls/OA20.pkl', compression='gzip')
-    oa3 = pd.read_pickle('../pkls/OA21.pkl', compression='gzip')
-    oa4 = pd.read_pickle('../pkls/OA22.pkl', compression='gzip')
+    path1 = Path(__file__).parent / "../pkls/OA19.pkl"
+    oa1 = pd.read_pickle(path1, compression='gzip')
+    path2 = Path(__file__).parent / "../pkls/OA20.pkl"
+    oa2= pd.read_pickle(path2, compression='gzip')
+    path3 = Path(__file__).parent / "../pkls/OA21.pkl"
+    oa3 = pd.read_pickle(path3, compression='gzip')
+    path4 = Path(__file__).parent / "../pkls/OA22.pkl"
+    oa4 = pd.read_pickle(path4, compression='gzip')
     oa = pd.concat([oa1, oa2], ignore_index=True, axis=0)
     oa = pd.concat([oa, oa3], ignore_index=True, axis=0)
     oa = pd.concat([oa, oa4], ignore_index=True, axis=0)
     return oa
 
 def read_cy_csv():
-    cy1 = pd.read_pickle('../pkls/CY19.pkl', compression='gzip')
-    cy2 = pd.read_pickle('../pkls/CY20.pkl', compression='gzip')
-    cy3 = pd.read_pickle('../pkls/CY21.pkl', compression='gzip')
-    cy4 = pd.read_pickle('../pkls/CY22.pkl', compression='gzip')
+    path1 = Path(__file__).parent / "../pkls/CY19.pkl"
+    cy1 = pd.read_pickle(path1, compression='gzip')
+    path2 = Path(__file__).parent / "../pkls/CY20.pkl"
+    cy2 = pd.read_pickle(path2, compression='gzip')
+    path3 = Path(__file__).parent / "../pkls/CY21.pkl"
+    cy3 = pd.read_pickle(path3, compression='gzip')
+    path4 = Path(__file__).parent / "../pkls/CY22.pkl"
+    cy4 = pd.read_pickle(path4, compression='gzip')
     cy = pd.concat([cy1, cy2], ignore_index=True, axis=0)
     cy = pd.concat([cy, cy3], ignore_index=True, axis=0)
     cy = pd.concat([cy, cy4], ignore_index=True, axis=0)

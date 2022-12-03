@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
 from fastapi import Depends, HTTPException
-from celery_tasks.tasks import train_models_task, add, read_oa_csv
+from celery_tasks.tasks import train_models_task, add, read_oa_csv, read_cy_csv
 from config.celery_utils import get_task_info
 
 from fastapi.security import OAuth2PasswordRequestForm
@@ -31,6 +31,7 @@ router = APIRouter(prefix='/datalog', tags=['datalog'], responses={404: {"descri
 @router.get('/hi')
 def test():
     df = read_oa_csv()
+    df = df.head()
     df = df.to_dict(orient='records')
     return df
 
@@ -165,8 +166,10 @@ async def post_todo(sentiments: Sentiments):
 
 
 @router.get("/api/revenues")
-async def get_revenues(db:str):
-    response = await fetch_all_revenue(db)
+def get_revenues(db:str):
+    cy = read_cy_csv()
+    oa = read_oa_csv()
+    response = fetch_all_revenue(db, cy, oa)
     return response
 
 
