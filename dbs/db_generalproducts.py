@@ -6,8 +6,6 @@ from models.model import General_Products
 
 client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
-#mariana's api
-
 async def fetch_general_products(db:str):
 
     database = client[db]

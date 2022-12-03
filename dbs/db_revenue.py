@@ -1,4 +1,3 @@
-import motor.motor_asyncio
 import pymongo
 import pandas as pd
 
