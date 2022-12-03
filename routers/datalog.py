@@ -15,7 +15,7 @@ from services.authentication import get_db_names, create_access_token, get_curre
 from services.api_weather import get_weather
 
 from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
-from dbs.db_revenue import fetch_by_range_revenue, fetch_revenue_in_db
+from dbs.db_revenue import fecth_by_range_revenue, fetch_revenue_in_db
 from dbs.db_sentiments import create_sentiments,fetch_by_range_sentiments,fetch_all_sentiments
 from dbs.db_wastage import fetch_all_wastage,fetch_date_range_wastage
 from dbs.db_generalproducts import fetch_general_products, fetch_products_by_date
@@ -171,10 +171,9 @@ def get_revenues(db:str):
     df = df.to_dict(orient='records')
     return df
 
-
 @router.get("/api/revenues/")
-async def get_revenue_by_range(db:str, start_date: str, end_date: str):
-    response = fetch_by_range_revenue(db, start_date, end_date)
+async def get_revenue_by_range(start_date: str, end_date: str):
+    response = await fecth_by_range_revenue(start_date, end_date)
     if response:
         return response
     raise HTTPException(
@@ -197,8 +196,8 @@ async def put_model_cat(db:str, category: str):
 
 
 @router.get("/api/revenue_forecast")
-async def get_revenue_forecast(db:str):
-    response = await fetch_latest_forecast_revenues(db)
+def get_revenue_forecast(db:str):
+    response = fetch_latest_forecast_revenues(db)
     return response
 
 #-------------------------------------------#

@@ -317,9 +317,15 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
 
     steps_l = list(np.arange(0, len(df), 5000)) + [len(df)]
 
+    df_revenue = df[['Establishment', 'Date', 'dailyRevenue']].copy()
+    df_revenue = df_revenue.drop_duplicates()
+    df_revenue.sort_values(by=['Date'], ascending=[False], inplace=True)
+    df_revenue.reset_index(inplace=True)
+    df_revenue.drop("index", axis=1, inplace=True)
+
     for start, end in zip(steps_l, steps_l[1:]):
-        client[db]['df_sales'].insert_many(
-            df.iloc[start:end].to_dict(orient="records"))
+        client[db]['df_sales'].insert_many(df.iloc[start:end].to_dict(orient="records"))
+        client[db]['revenue'].insert_many(df_revenue.iloc[start:end].to_dict(orient="records"))
 
     df_return = df.head()
     df_return = df_return.to_dict(orient="records")

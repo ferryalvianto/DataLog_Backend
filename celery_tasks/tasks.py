@@ -3,6 +3,7 @@ import pandas as pd
 import pymongo
 from models.timeseries import save_timeseries_to_db
 from models.ml_model_regression import save_model_to_db
+from typing import List
 from pathlib import Path
 
 def read_oa_csv():
