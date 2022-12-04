@@ -1,74 +1,87 @@
+import pymongo
+import pandas as pd
 import motor.motor_asyncio
+from models.model import Revenue
 
-client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
+# detch revenue by range
 
-#fetch all revenues
-async def fetch_all_revenue(db):
+
+async def fecth_by_range_revenue(db, start_date, end_date):
+    client = motor.motor_asyncio.AsyncIOMotorClient(
+        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
+    database = client[db]
+    collection = database.revenue
     revenues = []
-    mydb = client[db]
-    collection =mydb['wastage']
+    cursor = collection.find({'Date': {"$gte": start_date, "$lte":  end_date}})
+
+    async for document in cursor:
+        revenues.append(Revenue(**document))
+    return revenues
 
 
-    max_date = collection.find().sort([("Date",-1)]).limit(1)
+# def fetch_revenue_in_db(db: str):
+#     client = pymongo.MongoClient(
+#         'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+#     database = client[db]
+#     collection = database.revenue
+#     cursor = collection.aggregate([
+#         {
+#             "$project":
+#                 {
+#                     "Date": "$Date",
+#                     "dailyRevenue": "$dailyRevenue",
+#                     'Establishment': '$Establishment',
+#                     "_id": 0
+
+#                 }
+#         },
+#         {'$sort': {'Date': 1,  "Establishment": 1}},
+#     ])
+#     df = pd.DataFrame(cursor)
+#     df = df.drop_duplicates()
+#     df = df[-14:]
+#     return df
+
+
+async def fetch_revenue_in_db(db: str):
+    revenues = []
+    client = pymongo.MongoClient(
+        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+    database = client[db]
+    collection = database.revenue
+
+    max_date = collection.find().sort([("Date", -1)]).limit(1)
     async for maxDate in max_date:
         maxDate
 
     max_month = int(maxDate["Date"][5:7])
     max_year = int(maxDate["Date"][0:4])
-   
+
     cursor = collection.aggregate([
         {
             "$project":
                 {
-                    "year" :{"$year": { "$toDate": "$Date"}},
-                    "month": {"$month": { "$toDate": "$Date"}},
-                    "Date" : "$Date",
-                    "revenue" : "$dailyRevenue"
+                    "year": {"$year": {"$toDate": "$Date"}},
+                    "month": {"$month": {"$toDate": "$Date"}},
+                    "Date": "$Date",
+                    "revenue": "$dailyRevenue"
                 }
-        }
-        ,
-        {'$group': {"_id" : "$Date", "Revenue": {"$first": "$revenue"},  "year": {"$first": "$year"}, "month": {"$first": "$month"} }}
-        ,
+        },
+        {'$group': {"_id": "$Date", "Revenue": {"$first": "$revenue"},
+                    "year": {"$first": "$year"}, "month": {"$first": "$month"}}},
         {
-            "$match" : { "month" :max_month, "year": max_year }
+            "$match": {"month": max_month, "year": max_year}
         },
         {
             "$project":
                 {
-                    "Date" : "$id",
-                    "revenue" : "$Revenue"
+                    "Date": "$id",
+                    "revenue": "$Revenue"
                 }
         }
 
     ])
 
-
     async for document in cursor:
         revenues.append(document)
     return revenues
-
-
-#detch revenue by range
-async def fetch_by_range_revenue(db, start_date,end_date):
-    revenues = []
-    mydb = client[db]
-    collection =mydb['df_sales']
-    revenues = []
-    # cursor = collection.find({'Date': { "$gte": start_date, "$lte":  end_date}}) 
-    cursor = collection.aggregate([
-         {'$group': {"_id" : "$Date", "Revenue": {"$first": "$dailyRevenue"} }}
-        ,
-        {
-            "$match" : {'_id': { "$gte": start_date, "$lte":  end_date}
-        }
-        }
-
-    ])
-
-
-    async for document in cursor:
-         revenues.append(document)
-    return revenues
-
-
-   

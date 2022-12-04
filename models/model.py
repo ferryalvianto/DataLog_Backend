@@ -39,8 +39,9 @@ class Sentiments(BaseModel):
     Date: str
 
 class Revenue(BaseModel):
-    ymd: str
+    Date: str
     dailyRevenue: int
+    Establishment: int
 
 class ProductQuantityForecast(BaseModel):
     Date: str
@@ -63,6 +64,8 @@ class ML_Model(BaseModel):
     name: str
 
 
-class RevenueMaxDate(BaseModel):
+class General_Products(BaseModel):
+    Category: str
     Date: str
-    revenue: int
+    Name: str
+    Quantity: int

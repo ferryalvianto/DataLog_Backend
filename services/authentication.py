@@ -34,6 +34,7 @@ def get_db_names():
     lists.remove('admin')
     lists.remove('authentication')
     lists.remove('local')
+    lists.remove('TodoList')
     return {'names':lists}
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
