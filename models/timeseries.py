@@ -6,10 +6,10 @@ import pymongo
 import pickle
 from datetime import datetime, timedelta
 
-def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
+def save_timeseries_to_db(db: str, yyyy, mm, dd):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
-    col = mydb['df_sales']
+    col = mydb['revenue']
     results_oa = col.find({"Establishment":0},{"_id": 0,"Date":1, "dailyRevenue":1})
     results_cy = col.find({"Establishment":1},{"_id": 0,"Date":1, "dailyRevenue":1})
 
@@ -22,26 +22,26 @@ def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
     for x in results_cy:
         transaction_list_cy.append(x)
         
-    df_oa = pd.DataFrame(transaction_list_oa)
-    df_cy = pd.DataFrame(transaction_list_cy)
+    oa = pd.DataFrame(transaction_list_oa)
+    cy = pd.DataFrame(transaction_list_cy)
 
-    df_oa = df_oa.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
-    df_cy = df_cy.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
-
-    df_oa['Date'] = pd.to_datetime(df_oa['Date'])
-    df_cy['Date'] = pd.to_datetime(df_cy['Date'])
-
-    oa = oa[['Date','dailyRevenue']].copy()
-    cy = cy[['Date','dailyRevenue']].copy()
-
-    oa = oa.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
-    cy = cy.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
+    # oa = oa.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
+    # cy = cy.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
 
     oa['Date'] = pd.to_datetime(oa['Date'])
     cy['Date'] = pd.to_datetime(cy['Date'])
 
-    oa = oa.append(df_oa, ignore_index = True)
-    cy = cy.append(df_cy, ignore_index = True)
+    # oa = oa[['Date','dailyRevenue']].copy()
+    # cy = cy[['Date','dailyRevenue']].copy()
+
+    # oa = oa.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
+    # cy = cy.drop_duplicates(subset=['Date'], keep='last').reset_index(drop=True)
+
+    # oa['Date'] = pd.to_datetime(oa['Date'])
+    # cy['Date'] = pd.to_datetime(cy['Date'])
+
+    # oa = oa.append(df_oa, ignore_index = True)
+    # cy = cy.append(df_cy, ignore_index = True)
 
     cy.rename(columns={'dailyRevenue':'CY_dailyRevenue'}, inplace=True)
     df = oa.merge(cy, on='Date', how='left')
@@ -144,6 +144,21 @@ def save_timeseries_to_db(db: str, cy, oa, yyyy, mm, dd):
     forecast_CY = forecast_CY[['ds', 'yhat']][-10:].copy()
     forecast_CY.rename(columns={'ds':'date', 'yhat':'CY_predictedRevenue'}, inplace=True)
     forecast_CY['date'] = forecast_CY['date'].dt.strftime('%Y-%m-%d')
+
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+    mydb = client[db]
+    col = mydb['revenue']
+    col_forcast = mydb['revenue_forecast']
+
+    today = datetime.strptime(yyyy+'-'+mm+'-'+dd, '%Y-%m-%d')
+    yesterday = (today - timedelta(1)).strftime('%Y-%m-%d')
+    results = col_forcast.find({"latest_date_in_model": yesterday}, {"_id": 0})
+    results = pd.DataFrame(results)
+
+    if 'latest_date_in_model' in results.columns:
+        if results['latest_date_in_model'].str.contains(yesterday).any():
+            client[db]['revenue_forecast'].delete_many({ "latest_date_in_model": yesterday })
+            client[db]['timeseries_models'].delete_many({ "latest_date_in_model": yesterday })    
 
     preds = forecast_CY.merge(forecast_OA, on='date', how='left')
     preds['latest_date_in_model'] = yyyy+'-'+mm+'-'+dd

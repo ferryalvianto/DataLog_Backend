@@ -324,7 +324,8 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     df_revenue.drop("index", axis=1, inplace=True)
 
     for start, end in zip(steps_l, steps_l[1:]):
-        client[db]['df_sales'].insert_many(df.iloc[start:end].to_dict(orient="records"))
+        if df['Establishment'].isin({1}).any(): 
+            client[db]['df_sales'].insert_many(df.iloc[start:end].to_dict(orient="records"))
         client[db]['revenue'].insert_many(df_revenue.iloc[start:end].to_dict(orient="records"))
 
     df_return = df.head()

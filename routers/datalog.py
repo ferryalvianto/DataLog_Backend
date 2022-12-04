@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from starlette.responses import JSONResponse
 from fastapi import Depends, HTTPException
-from celery_tasks.tasks import train_models_task, add, read_oa_csv
+from celery_tasks.tasks import train_models_task, add
 from config.celery_utils import get_task_info
 
 from fastapi.security import OAuth2PasswordRequestForm
@@ -30,10 +30,10 @@ router = APIRouter(prefix='/datalog', tags=['datalog'], responses={404: {"descri
 
 @router.get('/hi')
 def test():
-    df = read_oa_csv()
-    df = df.head()
-    df = df.to_dict(orient='records')
-    return df
+    # df = read_oa_csv()
+    # df = df.head()
+    # df = df.to_dict(orient='records')
+    return 'hi'
 
 # APIs
 
@@ -269,7 +269,7 @@ async def upload_date_log(db:str, yyyy:str, mm:str, dd:str):
 async def upload_log(db:str, yyyy:str, mm:str, dd:str):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
-    col = mydb['df_sales']
+    col = mydb['revenue']
     inptstr = yyyy+'-'+mm+'-'+dd
     results = col.find({"Date": inptstr, '$or':[{"Establishment":0}, {"Establishment":1}]}, {"_id": 0,"Date":1, "Establishment":1})
     results = pd.DataFrame(results)
