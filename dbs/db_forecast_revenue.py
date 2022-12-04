@@ -1,6 +1,5 @@
 import motor.motor_asyncio
 
-
 async def fetch_latest_forecast_revenues(db:str):
     client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
 

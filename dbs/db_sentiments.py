@@ -1,4 +1,3 @@
-
 import motor.motor_asyncio
 
 #fetch all sentiments
@@ -7,33 +6,37 @@ async def fetch_all_sentiments():
     database = client.DataLog
     collection = database.Sentiments_Analysis
     sentiments = []
+    mydb = client[db]
+    collection = mydb['Sentiments_Analysis']
     cursor = collection.aggregate([
-                                    {'$group': {"_id" : "$Classification", "Total_Count": {"$sum": 1}   }}
-                                ])
+        {'$group': {"_id": "$Classification", "Total_Count": {"$sum": 1}}}
+    ])
     async for document in cursor:
         sentiments.append(document)
     return sentiments
 
-#count for each sentiments
-async def fetch_by_range_sentiments(start_date,end_date):
-    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
-    database = client.DataLog
-    collection = database.Sentiments_Analysis
+# count for each sentiments
+
+
+async def fetch_by_range_sentiments(db, start_date, end_date):
     sentiments = []
-    cursor = collection.aggregate([ {'$match': {'Date': { "$gte": start_date, "$lte":  end_date} }},
-                                    {'$group': {"_id" : "$Classification", "Total_Count": {"$sum": 1}   }}
-                                ])
+    mydb = client[db]
+    collection = mydb['Sentiments_Analysis']
+    cursor = collection.aggregate([{'$match': {'Date': {"$gte": start_date, "$lte":  end_date}}},
+                                   {'$group': {"_id": "$Classification",
+                                               "Total_Count": {"$sum": 1}}}
+                                   ])
     async for document in cursor:
         sentiments.append(document)
     return sentiments
 
-#insert sentiments
-async def create_sentiments(Sentiments):
-    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
-    database = client.DataLog
-    collection = database.Sentiments_Analysis
+# insert sentiments
+
+
+async def create_sentiments(db, Sentiments):
+    sentiments = []
+    mydb = client[db]
+    collection = mydb['Sentiments_Analysis']
     document = Sentiments
     result = await collection.insert_one(document)
     return document
-
-   

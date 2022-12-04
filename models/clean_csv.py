@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 import pymongo
 
+
 def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str, day: str):
-    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+    client = pymongo.MongoClient(
+        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
 
     url = 'https://drive.google.com/uc?id=' + id_inventory
     df = pd.read_csv(url)
@@ -225,7 +227,8 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     df = df.astype({'Establishment': int})
 
     base_url = "http://climate.weather.gc.ca/climate_data/bulk_data_e.html?"
-    query_url = "format=csv&stationID={}&Year={}&Month={}&Day={}&timeframe=1".format('51442', year, month, day)
+    query_url = "format=csv&stationID={}&Year={}&Month={}&Day={}&timeframe=1".format(
+        '51442', year, month, day)
     api_endpoint = base_url + query_url
     df_temp = pd.read_csv(api_endpoint, skiprows=0)
 
@@ -241,7 +244,8 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
 
     df_temp = df_temp[['Date', 'Temperature', 'Min_Temp_C_', 'Max_Temp_C_']]
 
-    df_temp = df_temp[df_temp['Date'].isin({year+'-'+month+'-'+day})].reset_index(drop=True)
+    df_temp = df_temp[df_temp['Date'].isin(
+        {year+'-'+month+'-'+day})].reset_index(drop=True)
 
     df_temp = df_temp.iloc[[0]]
 
@@ -263,63 +267,337 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
         df['Discover'] = 0
 
     df = df[['orderID', 'Establishment', 'Employee', 'Name', 'Category', 'Quantity', 'itemPrice', 'Total', 'Cash', 'Debit', 'Visa', 'Mastercard', 'Discover',
-                'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year', 'Date', 'dailyRevenueByOrder', 'dailyRevenue', 'Temperature', 'Min_Temp_C_', 'Max_Temp_C_']]
+             'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year', 'Date', 'dailyRevenueByOrder', 'dailyRevenue', 'Temperature', 'Min_Temp_C_', 'Max_Temp_C_']]
 
     df[['orderID', 'Establishment', 'Cash', 'Debit', 'Visa', 'Mastercard', 'Discover', 'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year']] = df[[
-            'orderID', 'Establishment', 'Cash', 'Debit', 'Visa', 'Mastercard', 'Discover', 'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year']].astype(int)
+        'orderID', 'Establishment', 'Cash', 'Debit', 'Visa', 'Mastercard', 'Discover', 'Amex', 'Gift Cards', 'hour', 'day', 'month', 'year']].astype(int)
 
     df.reset_index(inplace=True)
     df.drop("index", axis=1, inplace=True)
 
     cpi_url = "https://www.bankofcanada.ca/valet/observations/group/CPI_MONTHLY/csv"
     col_names = ["date", "V41690973"]
-    df_cpi = pd.read_csv(cpi_url, sep='delimiter', header=None, engine='python')
+    df_cpi = pd.read_csv(cpi_url, sep='delimiter',
+                         header=None, engine='python')
     df_cpi = df_cpi.iloc[20:]
     df_cpi.reset_index(inplace=True)
     df_cpi.drop("index", axis=1, inplace=True)
     headers = df_cpi.iloc[0].values
     df_cpi.columns = headers
     df_cpi.drop(index=0, axis=0, inplace=True)
-    df_cpi[['date', 'cpis']] = df_cpi['"date","V41690973","V41690914","STATIC_TOTALCPICHANGE","CPI_TRIM","CPI_MEDIAN","CPI_COMMON","ATOM_V41693242","STATIC_CPIXFET","CPIW"'].str.split(',', n=1, expand=True)
-    df_cpi = df_cpi[['date','cpis']].copy()
-    df_cpi[['cpi','cpis']] = df_cpi['cpis'].str.split(',', n=1, expand=True)
-    df_cpi = df_cpi[['date','cpi']].copy()
+    df_cpi[['date', 'cpis']] = df_cpi['"date","V41690973","V41690914","STATIC_TOTALCPICHANGE","CPI_TRIM","CPI_MEDIAN","CPI_COMMON","ATOM_V41693242","STATIC_CPIXFET","CPIW"'].str.split(
+        ',', n=1, expand=True)
+    df_cpi = df_cpi[['date', 'cpis']].copy()
+    df_cpi[['cpi', 'cpis']] = df_cpi['cpis'].str.split(',', n=1, expand=True)
+    df_cpi = df_cpi[['date', 'cpi']].copy()
     df_cpi['date'] = df_cpi['date'].str.replace('"', '')
     df_cpi['cpi'] = df_cpi['cpi'].str.replace('"', '')
     df_cpi['date'] = pd.to_datetime(df_cpi['date'])
     df_cpi['month'] = df_cpi['date'].dt.month
     df_cpi['year'] = df_cpi['date'].dt.year
-    df_cpi = df_cpi[['year','month','cpi']].copy()
+    df_cpi = df_cpi[['year', 'month', 'cpi']].copy()
     df_cpi['cpi'] = df_cpi['cpi'].astype(float)
 
-    df = df.merge(df_cpi, on=['year','month'], how='left')
+    df = df.merge(df_cpi, on=['year', 'month'], how='left')
 
     if df['cpi'].isnull().values.any():
         avg = df_cpi['cpi'][-3:].mean() + (df_cpi['cpi'][-1:] * 0.01)
         avg = round(avg.iloc[0], 2)
         df['cpi'] = df['cpi'].fillna(avg)
 
-    #reading gas prices csv
+    # reading gas prices csv
     gas = pd.read_csv('https://www150.statcan.gc.ca/t1/tbl1/en/dtl!downloadDbLoadingData-nonTraduit.action?pid=1810000101&latestN=0&startDate=20220101&endDate=20221201&csvLocale=en&selectedMembers=%5B%5B%5D%2C%5B2%5D%5D&checkedLevels=0D1%2C0D2')
     gas = gas[gas['GEO'].str.contains('Vancouver')]
-    gas = gas[['REF_DATE','VALUE']].copy()
+    gas = gas[['REF_DATE', 'VALUE']].copy()
     gas[['year', 'month']] = gas['REF_DATE'].str.split('-', 1, expand=True)
     gas[['year', 'month']] = gas[['year', 'month']].astype(int)
-    gas = gas[['year','month','VALUE']].copy()
+    gas = gas[['year', 'month', 'VALUE']].copy()
     gas.rename(columns={'VALUE': 'averageGasPrice'}, inplace=True)
 
-    df = df.merge(gas, on=['month','year'], how='left')
+    df = df.merge(gas, on=['month', 'year'], how='left')
 
     if df['averageGasPrice'].isnull().values.any():
-        avg = gas['averageGasPrice'][-3:].mean() + (gas['averageGasPrice'][-1:] * 0.01)
+        avg = gas['averageGasPrice'][-3:].mean() + \
+            (gas['averageGasPrice'][-1:] * 0.01)
         avg = round(avg.iloc[0], 2)
         df['averageGasPrice'] = df['averageGasPrice'].fillna(avg)
 
+     ####-----______________HEATMAP-----------####
+
+    def convert_HT_cat(category, product_name):
+
+        # produce
+        if (category == 'Produce'):
+            if ('Avocado' in product_name):  # done
+                return 'Avocados'
+            elif ('Banana' in product_name):  # done
+                return 'Bananas'
+            elif ('Potatoes' in product_name):  # done
+                return 'Yams and Potatoes'
+            elif (('Onion' in product_name) | ('Garlic' in product_name)):  # done
+                return 'Garlic and Onions'
+            elif ('Apples' in product_name):  # done
+                return 'Apples'
+            elif (('Oranges' in product_name) |
+                  ('Grapefruit' in product_name) | ('Lemons' in product_name) |
+                  ('Tangelo' in product_name) | ('Tangerine' in product_name)):
+                return 'Citruses'
+            else:
+                return 'Produce'
+        # breads / Bakery
+        elif (category == 'Bakery'):  # done
+            # Pastry Case
+            if (('To Live For' in product_name) |
+                ('Butterboom' in product_name) |
+                ('Panela Lemon' in product_name) |
+                ('Pane E Formaggio' in product_name) |
+                    ('Energy Bites' in product_name)):
+                return 'Coffee Bar'
+            else:
+                return 'Breads'  # done
+
+        # Snacks
+        elif (category == 'Snacks'):
+            if ('Hardbite' in product_name):
+                return 'Hardbite'
+            elif ('Chocolate' in product_name):
+                return 'Chocolates'
+            elif (('Bar' in product_name) | ('Herbaland' in product_name)):
+                return 'Snack Bars'
+            else:
+                return 'Chips'
+
+        # Health and Beauty
+        elif ((category == 'Health & Beauty') | (category == 'At Home')):
+            return 'Health & Beauty'
+
+        # Dairy
+        elif (category == 'Dairy'):
+            return 'Dairy'
+
+        # Health and Beauty
+        elif (category == 'Grocery'):  # dips and produce
+            if (('Hummus' in product_name) | ('Tofu' in product_name)):
+                return 'Dips and Produce'
+
+            elif ('Oil' in product_name):  # oil
+                return 'Oils'
+
+            elif (('Soup' in product_name) | ('Broth' in product_name)):  # Broths
+                return 'Broths'
+
+            elif (('Tea' in product_name) | ('Coffee' in product_name)):  # Coffee and tea
+                return 'Coffee and Teas'
+
+            elif ('Peanut Butter' in product_name):
+                return 'Peanut Butters'
+
+            elif ('Pasta' in product_name):
+                return 'Pasta'
+
+            return 'Grocery'
+
+        elif (category == 'Beverages'):
+            return 'Coffee and Teas'
+
+        elif (category == 'Meat & Seafood'):  # dips and produce
+            return 'Frozen meat and seafood'
+
+         # Vegan
+        elif ('Vegan' in product_name):
+            return 'Vegan'
+
+        elif (category == 'Be Fresh Meals'):
+            return 'Deli and Cheese and Meals'
+
+    # assigning value to HT_Category
+
+    df["HT_Category"] = df.apply(
+        lambda x: convert_HT_cat(x.Category, x.Name), axis=1)
+
+    # creating a function to assign coordinates
+
+    def assign_x_coordinate(ht_cat):
+        if (ht_cat == 'Citruses'):
+            return 789
+
+        elif (ht_cat == 'Avocados'):
+            return 923
+
+        elif (ht_cat == 'Apples'):
+            return 1031
+
+        elif (ht_cat == 'Yams and Potatoes'):
+            return 789
+
+        elif (ht_cat == 'Garlic and Onions'):
+            return 1009
+
+        elif (ht_cat == 'Bananas'):
+            return 1307
+
+        elif (ht_cat == 'Produce'):
+            return 620
+
+        elif (ht_cat == 'Coffee Bar'):
+            return 1380
+
+        elif (ht_cat == 'Breads'):
+            return 865
+
+        elif (ht_cat == 'Hardbite'):
+            return 1065
+
+        elif (ht_cat == 'Chocolates'):
+            return 1340
+
+        elif (ht_cat == 'Snack Bars'):
+            return 1099
+
+        elif (ht_cat == 'Chips'):
+            return 925
+
+        elif (ht_cat == 'Health & Beauty'):
+            return 1097
+
+        elif (ht_cat == 'Dairy'):
+            return 817
+
+        elif (ht_cat == 'Dips and Produce'):
+            return 817
+
+        elif (ht_cat == 'Oils'):
+            return 900
+
+        elif (ht_cat == 'Broths'):
+            return 900
+
+        elif (ht_cat == 'Coffee and Teas'):
+            return 945
+
+        elif (ht_cat == 'Peanut Butters'):
+            return 1047
+
+        elif (ht_cat == 'Pasta'):
+            return 800
+
+        elif (ht_cat == 'Frozen meat and seafood'):
+            return 943
+
+        elif (ht_cat == 'Vegan'):
+            return 720
+
+        elif (ht_cat == 'Candies'):
+            return 1280
+
+        elif (ht_cat == 'Local Items'):
+            return 730
+
+        elif (ht_cat == 'Deli and Cheese and Meals'):
+            return 1505
+        else:
+            return 1070
+
+    def assign_y_coordinate(ht_cat):
+        if (ht_cat == 'Citruses'):
+            return 745
+
+        elif (ht_cat == 'Avocados'):
+            return 745
+
+        elif (ht_cat == 'Apples'):
+            return 745
+
+        elif (ht_cat == 'Yams and Potatoes'):
+            return 790
+
+        elif (ht_cat == 'Garlic and Onions'):
+            return 790
+
+        elif (ht_cat == 'Bananas'):
+            return 843
+
+        elif (ht_cat == 'Produce'):
+            return 830
+
+        elif (ht_cat == 'Coffee Bar'):
+            return 1240
+
+        elif (ht_cat == 'Breads'):
+            return 653
+
+        elif (ht_cat == 'Hardbite'):
+            return 1175
+
+        elif (ht_cat == 'Chocolates'):
+            return 1011
+
+        elif (ht_cat == 'Snack Bars'):
+            return 950
+
+        elif (ht_cat == 'Chips'):
+            return 1169
+
+        elif (ht_cat == 'Health & Beauty'):
+            return 1080
+
+        elif (ht_cat == 'Dairy'):
+            return 1257
+
+        elif (ht_cat == 'Dips and Produce'):
+            return 1085
+
+        elif (ht_cat == 'Oils'):
+            return 955
+
+        elif (ht_cat == 'Broths'):
+            return 1087
+
+        elif (ht_cat == 'Coffee and Teas'):
+            return 949
+
+        elif (ht_cat == 'Peanut Butters'):
+            return 955
+
+        elif (ht_cat == 'Pasta'):
+            return 955
+
+        elif (ht_cat == 'Frozen meat and seafood'):
+            return 1263
+
+        elif (ht_cat == 'Vegan'):
+            return 665
+
+        elif (ht_cat == 'Candies'):
+            return 1020
+
+        elif (ht_cat == 'Local Items'):
+            return 1257
+
+        elif (ht_cat == 'Deli and Cheese and Meals'):
+            return 1040
+        else:
+            return 1383
+
+    df['x_coor'] = df.HT_Category.apply(lambda x: assign_x_coordinate(x))
+    df['y_coor'] = df.HT_Category.apply(lambda x: assign_y_coordinate(x))
+
+    #################################################
+
     steps_l = list(np.arange(0, len(df), 5000)) + [len(df)]
 
+    df_revenue = df[['Establishment', 'Date', 'dailyRevenue']].copy()
+    df_revenue = df_revenue.drop_duplicates()
+    df_revenue.sort_values(by=['Date'], ascending=[False], inplace=True)
+    df_revenue.reset_index(inplace=True)
+    df_revenue.drop("index", axis=1, inplace=True)
+
     for start, end in zip(steps_l, steps_l[1:]):
-        client[db]['df_sales'].insert_many(
-            df.iloc[start:end].to_dict(orient="records"))
+        if df['Establishment'].isin({1}).any():
+            client[db]['df_sales'].insert_many(
+                df.iloc[start:end].to_dict(orient="records"))
+        client[db]['revenue'].insert_many(
+            df_revenue.iloc[start:end].to_dict(orient="records"))
 
     df_return = df.head()
     df_return = df_return.to_dict(orient="records")
