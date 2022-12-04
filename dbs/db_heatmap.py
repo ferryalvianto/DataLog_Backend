@@ -3,8 +3,9 @@ import motor.motor_asyncio
 client = motor.motor_asyncio.AsyncIOMotorClient(
     'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
 
-
 # fetch all HT_Category
+
+
 async def fetch_all_ht_category(db):
     ht_category = []
     mydb = client[db]

@@ -582,7 +582,7 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     df['x_coor'] = df.HT_Category.apply(lambda x: assign_x_coordinate(x))
     df['y_coor'] = df.HT_Category.apply(lambda x: assign_y_coordinate(x))
 
-    ################################################
+    #################################################
 
     steps_l = list(np.arange(0, len(df), 5000)) + [len(df)]
 

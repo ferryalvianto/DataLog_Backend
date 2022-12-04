@@ -420,7 +420,7 @@ async def get_heatmap(db: str):
     response = await fetch_all_ht_category(db)
     return response
 
-# get heatmap location and quantity with date range filter
+# get heatmap location and quantity with date range filter .
 
 
 @router.get("/api/heatmap/")
