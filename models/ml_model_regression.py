@@ -35,7 +35,7 @@ def save_model_to_db(db: str, cy, yyyy, mm, dd):
              "Min_Temp_C_", "Max_Temp_C_", "year"]].copy()
     df = df[rel_col]
 
-    df = df.concat(cy, ignore_index=True)
+    df = df.append(cy, ignore_index=True)
 
     if 'year' in df.columns:
         df.rename(columns={'year': 'Year'}, inplace=True)
