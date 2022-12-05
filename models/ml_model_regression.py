@@ -132,7 +132,7 @@ def load_saved_model_from_db(db, weather_data):
 
     Categories = json_data["categories"]
 
-    Categories.pop(0)
+    Drop_Cat = Categories.pop(0)
 
     df = pd.DataFrame()
 
@@ -153,6 +153,12 @@ def load_saved_model_from_db(db, weather_data):
                             'Year': weather_data[i].dt_txt, 'Category': column
                             }, ignore_index=True)
 
+    for i in range(len(weather_data)):
+        df = df.append({'Temperature': weather_data[i].temp_avg,
+                        'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
+                        'Year': weather_data[i].dt_txt, 'Category': Drop_Cat
+                        }, ignore_index=True)
+
     df.fillna(0, inplace=True)
 
     df_orig = df.copy()
@@ -165,6 +171,7 @@ def load_saved_model_from_db(db, weather_data):
     prediction = linear_fetch.predict(df)
 
     prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
+    prediction = prediction.round(decimals=0)
 
     prediction["predicted_quantity"] = prediction["predicted_quantity"].apply(
         lambda x: abs(x))
@@ -208,7 +215,7 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
 
     Categories = json_data["categories"]
 
-    Categories.pop(0)
+    Drop_Cat = Categories.pop(0)
 
     df = pd.DataFrame()
 
@@ -229,6 +236,12 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
                             'Year': weather_data[i].dt_txt, 'Category': column
                             }, ignore_index=True)
 
+    for i in range(len(weather_data)):
+        df = df.append({'Temperature': weather_data[i].temp_avg,
+                        'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
+                        'Year': weather_data[i].dt_txt, 'Category': Drop_Cat
+                        }, ignore_index=True)
+
     df.fillna(0, inplace=True)
     df_orig = df.copy()
     df.drop("Category", axis=1, inplace=True)
@@ -239,6 +252,9 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
     prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
     prediction["predicted_quantity"] = prediction["predicted_quantity"].apply(
         lambda x: abs(x))
+
+    prediction = prediction.round(decimals=0)
+
     prediction['Category'] = df_orig.Category
     prediction['Date'] = df_orig.Year
     prediction = prediction.loc[prediction.Category == category]
@@ -279,7 +295,7 @@ def load_saved_model_from_db_quantity_forecast_table(db, weather_data):
 
     Categories = json_data["categories"]
 
-    Categories.pop(0)
+    Drop_Cat = Categories.pop(0)
 
     df = pd.DataFrame()
 
@@ -300,6 +316,13 @@ def load_saved_model_from_db_quantity_forecast_table(db, weather_data):
                             'Year': weather_data[i].dt_txt, 'Category': column
                             }, ignore_index=True)
 
+    # adding rows to drop dummy
+    for i in range(len(weather_data)):
+        df = df.append({'Temperature': weather_data[i].temp_avg,
+                        'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
+                        'Year': weather_data[i].dt_txt, 'Category': Drop_Cat
+                        }, ignore_index=True)
+
     df.fillna(0, inplace=True)
 
     df_orig = df.copy()
@@ -312,6 +335,7 @@ def load_saved_model_from_db_quantity_forecast_table(db, weather_data):
     prediction = linear_fetch.predict(df)
 
     prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
+    prediction = prediction.round(decimals=0)
 
     prediction["predicted_quantity"] = prediction["predicted_quantity"].apply(
         lambda x: abs(x))
@@ -326,9 +350,18 @@ def load_saved_model_from_db_quantity_forecast_table(db, weather_data):
     prediction_excel = pd.DataFrame(
         prediction_test_transpose.values.reshape(-1, 5), columns=Dates)
 
+    # adding back he drop dummies
+    Categories.append(Drop_Cat)
+
     category_list = np.array(Categories)
 
     prediction_excel.insert(0, 'Categories', category_list)
+
+    prediction_excel = prediction_excel[prediction_excel.Categories !=
+                                        "Standard (Do Not Use)"]
+
+    prediction_excel = prediction_excel[prediction_excel.Categories !=
+                                        "Milks- Inactive"]
 
     prediction_excel = prediction_excel.to_dict("records")
 
