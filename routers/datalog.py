@@ -31,6 +31,10 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+import seaborn as sns
+
 router = APIRouter(prefix='/datalog',
                    tags=['datalog'], responses={404: {"description": "Not found"}})
 
@@ -248,6 +252,50 @@ def get_weather_forecast():
 #         return response
 #     raise HTTPException(400, f"Something went wrong")
 
+
+@router.get('/api/apriori')
+def apriori(db:str, date:str):
+    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+    mydb = client[db]
+    col = mydb['df_sales']
+
+    results = col.find({"Date": date}, {"_id": 0})
+    results = pd.DataFrame(results)
+
+    apriori_df = results[['orderID','Name']].copy()
+    apriori_df['Name'] = apriori_df['Name'].str.replace(',', ' -')
+
+    # Recover unique InvoiceNo's.
+    OrderID = apriori_df['orderID'].unique()
+
+    # Create basket of items for each transaction.
+    Transactions = [list(apriori_df[apriori_df['orderID'] == u].Name.astype(str)) for u in OrderID]
+
+    # Instantiate transaction encoder.
+    encoder = TransactionEncoder()
+
+    # One-hot encode transactions.
+    onehot = encoder.fit(Transactions).transform(Transactions)
+
+    # Use unique items as column headers.
+    onehot = pd.DataFrame(onehot, columns = encoder.columns_)
+
+    # Print onehot header.
+    onehot.head()
+
+    # Compute frequent itemsets using the Apriori algorithm
+    frequent_itemsets = apriori(onehot, 
+                                min_support = 0.006, 
+                                max_len = 2, 
+                                use_colnames = True)
+
+    rules = association_rules(frequent_itemsets)
+    rules['antecedents'] = rules['antecedents'].apply(lambda a: ','.join(list(a)))
+    rules['consequents'] = rules['consequents'].apply(lambda a: ','.join(list(a)))
+    support_table = rules.pivot(index='consequents', columns='antecedents',values='support')
+    sns.heatmap(support_table)
+
+    support_table.to_dict(orient='records')
 
 @router.get("/api/model_regression_result")
 async def put_model(db: str):
