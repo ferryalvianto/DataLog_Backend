@@ -435,165 +435,165 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
 
     def assign_x_coordinate(ht_cat):
         if (ht_cat == 'Citruses'):
-            return 789
+            return 23.45
 
         elif (ht_cat == 'Avocados'):
-            return 923
+            return 25
 
         elif (ht_cat == 'Apples'):
-            return 1031
+            return 27
 
         elif (ht_cat == 'Yams and Potatoes'):
-            return 789
+            return 23.45
 
         elif (ht_cat == 'Garlic and Onions'):
-            return 1009
+            return 45
 
         elif (ht_cat == 'Bananas'):
             return 1307
 
         elif (ht_cat == 'Produce'):
-            return 620
+            return 20
 
         elif (ht_cat == 'Coffee Bar'):
-            return 1380
+            return 45
 
         elif (ht_cat == 'Breads'):
-            return 865
+            return 26
 
         elif (ht_cat == 'Hardbite'):
-            return 1065
+            return 30
 
         elif (ht_cat == 'Chocolates'):
-            return 1340
+            return 45
 
         elif (ht_cat == 'Snack Bars'):
-            return 1099
+            return 30
 
         elif (ht_cat == 'Chips'):
-            return 925
+            return 23.45
 
         elif (ht_cat == 'Health & Beauty'):
-            return 1097
+            return 32
 
         elif (ht_cat == 'Dairy'):
-            return 817
+            return 26
 
         elif (ht_cat == 'Dips and Produce'):
-            return 817
+            return 20
 
         elif (ht_cat == 'Oils'):
-            return 900
+            return 26
 
         elif (ht_cat == 'Broths'):
-            return 900
+            return 26
 
         elif (ht_cat == 'Coffee and Teas'):
-            return 945
+            return 45.23
 
         elif (ht_cat == 'Peanut Butters'):
-            return 1047
+            return 28
 
         elif (ht_cat == 'Pasta'):
-            return 800
+            return 26
 
         elif (ht_cat == 'Frozen meat and seafood'):
-            return 943
+            return 28
 
         elif (ht_cat == 'Vegan'):
-            return 720
+            return 23.45
 
         elif (ht_cat == 'Candies'):
-            return 1280
+            return 43
 
         elif (ht_cat == 'Local Items'):
-            return 730
+            return 23.45
 
         elif (ht_cat == 'Deli and Cheese and Meals'):
-            return 1505
+            return 50
         else:
-            return 1070
+            return 0
 
     def assign_y_coordinate(ht_cat):
         if (ht_cat == 'Citruses'):
-            return 745
+            return 60
 
         elif (ht_cat == 'Avocados'):
-            return 745
+            return 60
 
         elif (ht_cat == 'Apples'):
-            return 745
+            return 60
 
         elif (ht_cat == 'Yams and Potatoes'):
-            return 790
+            return 58
 
         elif (ht_cat == 'Garlic and Onions'):
-            return 790
+            return 58
 
         elif (ht_cat == 'Bananas'):
-            return 843
+            return 50
 
         elif (ht_cat == 'Produce'):
-            return 830
+            return 60
 
         elif (ht_cat == 'Coffee Bar'):
-            return 1240
+            return 23.45
 
         elif (ht_cat == 'Breads'):
-            return 653
+            return 70
 
         elif (ht_cat == 'Hardbite'):
-            return 1175
+            return 35
 
         elif (ht_cat == 'Chocolates'):
-            return 1011
+            return 40
 
         elif (ht_cat == 'Snack Bars'):
-            return 950
+            return 43
 
         elif (ht_cat == 'Chips'):
-            return 1169
+            return 40
 
         elif (ht_cat == 'Health & Beauty'):
-            return 1080
+            return 40
 
         elif (ht_cat == 'Dairy'):
-            return 1257
+            return 23.45
 
         elif (ht_cat == 'Dips and Produce'):
-            return 1085
+            return 40
 
         elif (ht_cat == 'Oils'):
-            return 955
+            return 45
 
         elif (ht_cat == 'Broths'):
-            return 1087
+            return 40
 
         elif (ht_cat == 'Coffee and Teas'):
-            return 949
+            return 55.23
 
         elif (ht_cat == 'Peanut Butters'):
-            return 955
+            return 45
 
         elif (ht_cat == 'Pasta'):
-            return 955
+            return 45
 
         elif (ht_cat == 'Frozen meat and seafood'):
-            return 1263
+            return 23.45
 
         elif (ht_cat == 'Vegan'):
-            return 665
+            return 70
 
         elif (ht_cat == 'Candies'):
-            return 1020
+            return 40
 
         elif (ht_cat == 'Local Items'):
-            return 1257
+            return 23.45
 
         elif (ht_cat == 'Deli and Cheese and Meals'):
-            return 1040
+            return 40
         else:
-            return 1383
+            return 0
 
     df['x_coor'] = df.HT_Category.apply(lambda x: assign_x_coordinate(x))
     df['y_coor'] = df.HT_Category.apply(lambda x: assign_y_coordinate(x))
