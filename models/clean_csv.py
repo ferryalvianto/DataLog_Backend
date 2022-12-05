@@ -17,11 +17,12 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     df_wastage['Date_Time'] = pd.to_datetime(df_wastage['Date_Time']).dt.date
     df_wastage = df_wastage[["Name", "Action", "Quantity", "Date_Time"]]
     df_wastage.columns = df_wastage.columns.str.replace('Date_Time', "Date")
+    df_wastage['Date'] = df_wastage['Date'].apply(
+        lambda x: x.strftime('%Y-%m-%d'))
     df_wastage = df_wastage[df_wastage['Action'] == 'Wastage']
     df_wastage.reset_index(drop=True)
 
-    # client[db]['wastage'].insert_many(
-    #     df_wastage.to_dict(orient="records"))
+    client[db]['wastage'].insert_many(df_wastage.to_dict(orient="records"))
 
     ################################################################
 
