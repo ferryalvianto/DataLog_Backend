@@ -453,7 +453,7 @@ async def clean_order_hist(db:str, id_order_hist:str):
 # Employee Productivity
 @router.get("/api/employee_productivity")
 def fetch_employee_speed(db:str):
-    response =  employee_speed(db)
+    response = employee_speed(db)
     if response:
         return response
     raise HTTPException(
