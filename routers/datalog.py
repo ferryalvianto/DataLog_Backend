@@ -387,6 +387,7 @@ def update_training_log(db: str):
                           "$set": {'isDone': False}})
     return '1'
 
+
 #-------------------------------------------#
 # General Products
 @router.get("/api/general_products")

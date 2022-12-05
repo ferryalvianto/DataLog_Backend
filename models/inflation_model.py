@@ -1,11 +1,5 @@
 import pandas as pd
-import holidays
-from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 import pymongo
-import pickle
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from datetime import datetime, timedelta
 
 def inflation_model(db: str):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
@@ -63,6 +57,7 @@ def inflation_model(db: str):
     results = revenue_inflation.to_dict("records")
 
     return results
+
 
 
 
