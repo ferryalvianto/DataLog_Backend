@@ -609,10 +609,10 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
 
     for start, end in zip(steps_l, steps_l[1:]):
         if df['Establishment'].isin({1}).any():
-            client[db]['df_sales'].insert_many(
-                df.iloc[start:end].to_dict(orient="records"))
-        client[db]['revenue'].insert_many(
-            df_revenue.iloc[start:end].to_dict(orient="records"))
+            client[db]['df_sales'].insert_many(df.iloc[start:end].to_dict(orient="records"))
+
+    for start, end in zip(steps_l, steps_l[1:]):
+        client[db]['revenue'].insert_many(df_revenue.iloc[start:end].to_dict(orient="records"))
 
     df_return = df.head()
     df_return = df_return.to_dict(orient="records")

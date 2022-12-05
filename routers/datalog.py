@@ -9,7 +9,7 @@ from datetime import timedelta, datetime
 from fastapi.encoders import jsonable_encoder
 
 from models.clean_csv import cleancsv
-from models.model import Sentiments, User, UserInDB, Token
+from models.model import User, UserInDB, Token
 from models.ml_model_regression import load_saved_model_from_db, load_saved_model_from_db_with_category, load_saved_model_from_db_quantity_forecast_table
 from models.nps_score import nps_score
 from models.employee_prod import cleancsv_order_hist, employee_speed
@@ -23,8 +23,6 @@ from dbs.db_sentiments import create_sentiments, fetch_by_range_sentiments, fetc
 from dbs.db_wastage import fetch_all_wastage, fetch_date_range_wastage
 from dbs.db_generalproducts import fetch_general_products, fetch_products_by_date
 from dbs.db_heatmap import fetch_all_ht_category, fetch_date_range_ht_category
-
-from celery_tasks.tasks import read_cy_csv, read_cy_csv_linear
 
 import pandas as pd
 import pymongo
