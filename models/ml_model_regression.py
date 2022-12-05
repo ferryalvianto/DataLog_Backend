@@ -148,15 +148,15 @@ def load_saved_model_from_db(db, weather_data):
 
     for column in Categories:
         for i in range(len(weather_data)):
-            df = df.append({column: 1, 'Temperature': weather_data[i].temp_avg,
-                            'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
-                            'Year': weather_data[i].dt_txt, 'Category': column
+            df = df.append({column: 1, 'Temperature': weather_data[i]["temp_avg"],
+                            'Min_Temp_C_': weather_data[i]["temp_min"], 'Max_Temp_C_': weather_data[i]["temp_max"],
+                            'Year': weather_data[i]["dt_txt"], 'Category': column
                             }, ignore_index=True)
 
     for i in range(len(weather_data)):
-        df = df.append({'Temperature': weather_data[i].temp_avg,
-                        'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
-                        'Year': weather_data[i].dt_txt, 'Category': Drop_Cat
+        df = df.append({'Temperature': weather_data[i]["temp_avg"],
+                        'Min_Temp_C_': weather_data[i]["temp_min"], 'Max_Temp_C_': weather_data[i]["temp_max"],
+                        'Year': weather_data[i]["dt_txt"], 'Category': Drop_Cat
                         }, ignore_index=True)
 
     df.fillna(0, inplace=True)
@@ -231,15 +231,15 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
 
     for column in Categories:
         for i in range(len(weather_data)):
-            df = df.append({column: 1, 'Temperature': weather_data[i].temp_avg,
-                            'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
-                            'Year': weather_data[i].dt_txt, 'Category': column
+            df = df.append({column: 1, 'Temperature': weather_data[i]["temp_avg"],
+                            'Min_Temp_C_': weather_data[i]["temp_min"], 'Max_Temp_C_': weather_data[i]["temp_max"],
+                            'Year': weather_data[i]["dt_txt"], 'Category': column
                             }, ignore_index=True)
 
     for i in range(len(weather_data)):
-        df = df.append({'Temperature': weather_data[i].temp_avg,
-                        'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
-                        'Year': weather_data[i].dt_txt, 'Category': Drop_Cat
+        df = df.append({'Temperature': weather_data[i]["temp_avg"],
+                        'Min_Temp_C_': weather_data[i]["temp_min"], 'Max_Temp_C_': weather_data[i]["temp_max"],
+                        'Year': weather_data[i]["dt_txt"], 'Category': Drop_Cat
                         }, ignore_index=True)
 
     df.fillna(0, inplace=True)
@@ -311,16 +311,15 @@ def load_saved_model_from_db_quantity_forecast_table(db, weather_data):
 
     for column in Categories:
         for i in range(len(weather_data)):
-            df = df.append({column: 1, 'Temperature': weather_data[i].temp_avg,
-                            'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
-                            'Year': weather_data[i].dt_txt, 'Category': column
+            df = df.append({column: 1, 'Temperature': weather_data[i]["temp_avg"],
+                            'Min_Temp_C_': weather_data[i]["temp_min"], 'Max_Temp_C_': weather_data[i]["temp_max"],
+                            'Year': weather_data[i]["dt_txt"], 'Category': column
                             }, ignore_index=True)
 
-    # adding rows to drop dummy
     for i in range(len(weather_data)):
-        df = df.append({'Temperature': weather_data[i].temp_avg,
-                        'Min_Temp_C_': weather_data[i].temp_min, 'Max_Temp_C_': weather_data[i].temp_max,
-                        'Year': weather_data[i].dt_txt, 'Category': Drop_Cat
+        df = df.append({'Temperature': weather_data[i]["temp_avg"],
+                        'Min_Temp_C_': weather_data[i]["temp_min"], 'Max_Temp_C_': weather_data[i]["temp_max"],
+                        'Year': weather_data[i]["dt_txt"], 'Category': Drop_Cat
                         }, ignore_index=True)
 
     df.fillna(0, inplace=True)
@@ -348,10 +347,10 @@ def load_saved_model_from_db_quantity_forecast_table(db, weather_data):
     prediction_test_transpose = prediction.predicted_quantity
 
     prediction_excel = pd.DataFrame(
-        prediction_test_transpose.values.reshape(-1, 5), columns=Dates)
+        prediction_test_transpose.values.reshape(-1, len(weather_data)), columns=Dates)
 
     # adding back he drop dummies
-    Categories.append(Drop_Cat)
+    Categories.insert(0, Drop_Cat)
 
     category_list = np.array(Categories)
 
