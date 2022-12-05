@@ -1,11 +1,10 @@
 import motor.motor_asyncio
 
-client = motor.motor_asyncio.AsyncIOMotorClient(
-    'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
-
-
-# fetch all sentiments
-async def fetch_all_sentiments(db):
+#fetch all sentiments
+async def fetch_all_sentiments():
+    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
+    database = client.DataLog
+    collection = database.Sentiments_Analysis
     sentiments = []
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
