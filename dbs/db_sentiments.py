@@ -34,10 +34,9 @@ async def fetch_by_range_sentiments(db, start_date, end_date):
 # insert sentiments
 
 
-async def create_sentiments(db, Sentiments):
+async def create_sentiments(db, rating, comment):
     sentiments = []
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
-    document = Sentiments
-    result = await collection.insert_one(document)
-    return document
+    info = collection.insert_one({'rating': rating, 'comment': comment})
+    return rating

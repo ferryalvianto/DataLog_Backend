@@ -165,9 +165,9 @@ async def get_sentiment_by_range(db: str, start_date: str, end_date: str):
 # inserting sentiments
 
 
-@router.post("/api/insert_sentiments/", response_model=Sentiments)
-async def post_todo(sentiments: Sentiments):
-    response = await create_sentiments(sentiments.dict())
+@router.post("/api/insert_sentiments")
+async def post_todo(db: str, rating: int, comment: str):
+    response = await create_sentiments(db, rating, comment)
     if response:
         return response
     raise HTTPException(400, "Something went wrong")
