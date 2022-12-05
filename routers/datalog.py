@@ -14,6 +14,7 @@ from models.ml_model_regression import load_saved_model_from_db, load_saved_mode
 from models.nps_score import nps_score
 from models.employee_prod import cleancsv_order_hist, employee_speed
 from models.breakeven_point import breakeven_point
+from models.inflation_model import inflation_model
 from services.authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db
 from services.api_weather import get_weather
 
@@ -388,8 +389,6 @@ def update_training_log(db: str):
 
 #-------------------------------------------#
 # General Products
-
-
 @router.get("/api/general_products")
 async def fetch_products(db: str):
     response = await fetch_general_products(db)
@@ -409,27 +408,6 @@ async def fetch_products_filtered(db: str, start_date: str, end_date: str):
 
 #-------------------------------------------#
 # Net Promoter Score (NPS)
-@router.get("/api/upload_sentiments")
-async def upload_sentiments(db:str, yyyy:str, mm:str, dd:str):
-    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
-    mydb = client[db]
-    col = mydb['Sentiments_Analysis']
-
-    documents = []
-
-
-    for document in documents.values():
-        col.insert_one(document)
-
-    # for res in results:
-    #     date = res['Date']
-    #     sentiments_body = res['Sentiments_Body']
-    #     classification = res['Classification']
-    #     if yyyy+'-'+mm+'-'+dd in date:
-    #         return 'True'
-    #     else:
-    #         return 'False'
-
 @router.get("/api/nps_score")
 def fetch_nps_score(db:str):
     response =  nps_score(db)
@@ -466,3 +444,13 @@ def fetch_breakeven(db:str):
         return response
     raise HTTPException(
         404, f"Break even point is not available")
+
+#-------------------------------------------#
+# Inflation Forecast
+@router.get("/api/inflation")
+def fetch_inflation(db:str):
+    response =  inflation_model(db)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"Inflation Forecast is not available")
