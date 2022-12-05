@@ -10,6 +10,21 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     url = 'https://drive.google.com/uc?id=' + id_inventory
     df = pd.read_csv(url)
 
+    #### LOADING WASTAGE TO DB ####
+
+    df_wastage = df.copy()
+    df_wastage.columns = df.columns.str.replace('/', "_")
+    df_wastage['Date_Time'] = pd.to_datetime(df_wastage['Date_Time']).dt.date
+    df_wastage = df_wastage[["Name", "Action", "Quantity", "Date_Time"]]
+    df_wastage.columns = df_wastage.columns.str.replace('Date_Time', "Date")
+    df_wastage = df_wastage[df_wastage['Action'] == 'Wastage']
+    df_wastage.reset_index(drop=True)
+
+    # client[db]['wastage'].insert_many(
+    #     df_wastage.to_dict(orient="records"))
+
+    ################################################################
+
     if 'Action' in df.columns:
         dummy = pd.get_dummies(df['Action'])
         df = df.merge(dummy, left_index=True, right_index=True)

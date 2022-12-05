@@ -10,7 +10,7 @@ from fastapi.encoders import jsonable_encoder
 
 from models.clean_csv import cleancsv
 from models.model import Sentiments, User, UserInDB, Token
-from models.ml_model_regression import load_saved_model_from_db, load_saved_model_from_db_with_category
+from models.ml_model_regression import load_saved_model_from_db, load_saved_model_from_db_with_category, load_saved_model_from_db_quantity_forecast_table
 from models.nps_score import nps_score
 from models.employee_prod import cleancsv_order_hist, employee_speed
 from models.breakeven_point import breakeven_point
@@ -23,6 +23,8 @@ from dbs.db_sentiments import create_sentiments, fetch_by_range_sentiments, fetc
 from dbs.db_wastage import fetch_all_wastage, fetch_date_range_wastage
 from dbs.db_generalproducts import fetch_general_products, fetch_products_by_date
 from dbs.db_heatmap import fetch_all_ht_category, fetch_date_range_ht_category
+
+from celery_tasks.tasks import read_cy_csv, read_cy_csv_linear
 
 import pandas as pd
 import pymongo
@@ -163,12 +165,23 @@ async def get_sentiment_by_range(db: str, start_date: str, end_date: str):
     raise HTTPException(
         404, f"There is no sentiments from {start_date} and {end_date}")
 
+
+#-------------------------------------------#
+# model api
+
+# @router.get("/api/model_regression")
+# async def put_model(db:str, yyyy:str, mm:str, dd:str):
+#     response = save_model_to_db(db, yyyy, mm, dd)
+#     if response:
+#         return response
+#     raise HTTPException(400, f"Something went wrong")
+
 # inserting sentiments
 
 
-@router.post("/api/insert_sentiments/", response_model=Sentiments)
-async def post_todo(sentiments: Sentiments):
-    response = await create_sentiments(sentiments.dict())
+@router.get("/api/insert_sentiments")
+async def put_sentiment(db: str, rating: int, comment: str):
+    response = await create_sentiments(db, rating, comment)
     if response:
         return response
     raise HTTPException(400, "Something went wrong")
@@ -196,7 +209,8 @@ async def get_revenue_by_range(db: str, start_date: str, end_date: str):
 
 @router.get("/api/quantity_forecast")
 async def put_model(db: str):
-    response = load_saved_model_from_db(db, get_weather())
+    response = load_saved_model_from_db(
+        db, get_weather())
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
@@ -465,4 +479,15 @@ def fetch_breakeven(db:str):
     if response:
         return response
     raise HTTPException(
-        404, f"Break even point is not available")
+        404, f"There is no records from {start_date} and {end_date}")
+
+
+# Quantity Forecast table
+
+@router.get("/api/quantity_forecast_table")
+async def get_model_quantity_forecast_table(db: str):
+    response = load_saved_model_from_db_quantity_forecast_table(
+        db, get_weather())
+    if response:
+        return response
+    raise HTTPException(400, f"Something went wrong")
