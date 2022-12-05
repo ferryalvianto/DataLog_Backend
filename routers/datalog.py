@@ -14,7 +14,7 @@ from models.ml_model_regression import load_saved_model_from_db, load_saved_mode
 from models.nps_score import nps_score
 from models.employee_prod import cleancsv_order_hist, employee_speed
 from models.breakeven_point import breakeven_point
-from services.authentication import get_db_names, create_access_token, get_current_active_user, get_access_token,update_user_db
+from services.authentication import get_db_names, create_access_token, get_current_active_user, get_access_token, update_user_db
 from services.api_weather import get_weather
 
 from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
@@ -423,14 +423,16 @@ async def fetch_products_filtered(db: str, start_date: str, end_date: str):
 
 #-------------------------------------------#
 # Net Promoter Score (NPS)
+
+
 @router.get("/api/upload_sentiments")
-async def upload_sentiments(db:str, yyyy:str, mm:str, dd:str):
-    client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
+async def upload_sentiments(db: str, yyyy: str, mm: str, dd: str):
+    client = pymongo.MongoClient(
+        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
     col = mydb['Sentiments_Analysis']
 
     documents = []
-
 
     for document in documents.values():
         col.insert_one(document)
@@ -444,9 +446,10 @@ async def upload_sentiments(db:str, yyyy:str, mm:str, dd:str):
     #     else:
     #         return 'False'
 
+
 @router.get("/api/nps_score")
-def fetch_nps_score(db:str):
-    response =  nps_score(db)
+def fetch_nps_score(db: str):
+    response = nps_score(db)
     if response:
         return response
     raise HTTPException(
@@ -454,8 +457,10 @@ def fetch_nps_score(db:str):
 
 #-------------------------------------------#
 # Clean Order History csv
+
+
 @router.get("/api/clean_csv_order_hist")
-async def clean_order_hist(db:str, id_order_hist:str):
+async def clean_order_hist(db: str, id_order_hist: str):
     if db == 'BeFresh':
         return cleancsv_order_hist(db, id_order_hist)
     elif db == 'Datalog':
@@ -463,8 +468,10 @@ async def clean_order_hist(db:str, id_order_hist:str):
     raise HTTPException(400, f"Something went wrong")
 
 # Employee Productivity
+
+
 @router.get("/api/employee_productivity")
-def fetch_employee_speed(db:str):
+def fetch_employee_speed(db: str):
     response = employee_speed(db)
     if response:
         return response
@@ -472,10 +479,12 @@ def fetch_employee_speed(db:str):
         404, f"Employee productivity is not available")
 
 #-------------------------------------------#
-# Breakeven Analysis 
+# Breakeven Analysis
+
+
 @router.get("/api/breakeven_analysis")
-def fetch_breakeven(db:str):
-    response =  breakeven_point(db)
+def fetch_breakeven(db: str):
+    response = breakeven_point(db)
     if response:
         return response
     raise HTTPException(
@@ -491,3 +500,24 @@ async def get_model_quantity_forecast_table(db: str):
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")
+
+
+# heatmap
+# get heatmap location and quantity
+
+
+@router.get("/api/heatmap")
+async def get_heatmap(db: str):
+    response = await fetch_all_ht_category(db)
+    return response
+
+# get heatmap location and quantity with date range filter .
+
+
+@router.get("/api/heatmap/")
+async def get_by_range_heatmap(db: str, start_date: str, end_date: str):
+    response = await fetch_date_range_ht_category(db, start_date, end_date)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"There is no records from {start_date} and {end_date}")
