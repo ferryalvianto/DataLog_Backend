@@ -21,6 +21,8 @@ from dbs.db_wastage import fetch_all_wastage, fetch_date_range_wastage
 from dbs.db_generalproducts import fetch_general_products, fetch_products_by_date
 from dbs.db_heatmap import fetch_all_ht_category, fetch_date_range_ht_category
 
+from celery_tasks.tasks import read_cy_csv, read_cy_csv_linear
+
 import pandas as pd
 import pymongo
 from dateutil.relativedelta import relativedelta
@@ -193,7 +195,8 @@ async def get_revenue_by_range(db: str, start_date: str, end_date: str):
 
 @router.get("/api/quantity_forecast")
 async def put_model(db: str):
-    response = load_saved_model_from_db(db, get_weather())
+    response = load_saved_model_from_db(
+        db, get_weather())
     if response:
         return response
     raise HTTPException(400, f"Something went wrong")

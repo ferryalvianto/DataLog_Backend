@@ -37,6 +37,19 @@ def save_model_to_db(db: str, cy, yyyy, mm, dd):
 
     df = df.append(cy, ignore_index=True)
 
+    df = df.sort_values(by='Category', ascending=True)
+
+    Categories = df.copy()
+
+    Categories = Categories.Category.unique()
+
+    Categories_final = []
+
+    for cat in Categories:
+        Categories_final.append(cat)
+
+    df.dropna(inplace=True)
+
     if 'year' in df.columns:
         df.rename(columns={'year': 'Year'}, inplace=True)
 
@@ -76,12 +89,14 @@ def save_model_to_db(db: str, cy, yyyy, mm, dd):
     info = mycon.insert_one({model_name: pickled_model,
                             'name': model_name,
                              'created_time': time.time(),
-                             'latest_date_in_model': yyyy+'-'+mm+'-'+dd})
+                             'latest_date_in_model': yyyy+'-'+mm+'-'+dd,
+                             'categories': Categories_final})
 
     details = {
         'model_name': model_name,
         'created_time': time.time()
     }
+
     return details
 
 
@@ -106,13 +121,16 @@ def load_saved_model_from_db(db, weather_data):
     linear_fetch = pickle.loads(pickled_model)
 
     # fetch category mongodb
-    if db == 'BeFresh':
-        dbconnection_Order_Item_Transaction = "df_sales"
-    else:
-        dbconnection_Order_Item_Transaction = "Order_Item_Transaction"
+    # if db == 'BeFresh':
+    #     dbconnection_Order_Item_Transaction = "df_sales"
+    # else:
+    #     dbconnection_Order_Item_Transaction = "Order_Item_Transaction"
 
-    mycon = mydb[dbconnection_Order_Item_Transaction]
-    Categories = mycon.distinct("Category")
+    # mycon = mydb[dbconnection_Order_Item_Transaction]
+    # Categories = mycon.distinct("Category")
+
+    Categories = json_data["categories"]
+
     Categories.pop(0)
 
     df = pd.DataFrame()
@@ -146,6 +164,9 @@ def load_saved_model_from_db(db, weather_data):
     prediction = linear_fetch.predict(df)
 
     prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
+
+    prediction["predicted_quantity"] = prediction["predicted_quantity"].apply(
+        lambda x: abs(x))
 
     prediction['Category'] = df_orig.Category
     prediction['Date'] = df_orig.Year
@@ -156,14 +177,14 @@ def load_saved_model_from_db(db, weather_data):
 
 
 def load_saved_model_from_db_with_category(db, weather_data, category):
-    myclient = pymongo.MongoClient(
-        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     dbconnection = 'regression_models'
     model_name = "my_linear_model"
 
     json_data = {}
 
     # fetch model in mongodb
+    myclient = pymongo.MongoClient(
+        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = myclient[db]
     mycon = mydb[dbconnection]
     data = mycon.find({'name': model_name})
@@ -172,15 +193,20 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
         json_data = i
 
     pickled_model = json_data[model_name]
+
     linear_fetch = pickle.loads(pickled_model)
 
     # fetch category mongodb
-    if db == 'BeFresh':
-        mycon = mydb["df_sales"]
-    else:
-        mycon = mydb["Order_Item_Transaction"]
+    # if db == 'BeFresh':
+    #     dbconnection_Order_Item_Transaction = "df_sales"
+    # else:
+    #     dbconnection_Order_Item_Transaction = "Order_Item_Transaction"
 
-    Categories = mycon.distinct("Category")
+    # mycon = mydb[dbconnection_Order_Item_Transaction]
+    # Categories = mycon.distinct("Category")
+
+    Categories = json_data["categories"]
+
     Categories.pop(0)
 
     df = pd.DataFrame()
@@ -210,6 +236,8 @@ def load_saved_model_from_db_with_category(db, weather_data, category):
 
     prediction = linear_fetch.predict(df)
     prediction = pd.DataFrame(prediction, columns=["predicted_quantity"])
+    prediction["predicted_quantity"] = prediction["predicted_quantity"].apply(
+        lambda x: abs(x))
     prediction['Category'] = df_orig.Category
     prediction['Date'] = df_orig.Year
     prediction = prediction.loc[prediction.Category == category]

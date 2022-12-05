@@ -37,6 +37,15 @@ def read_cy_csv():
     return cy
 
 
+def read_cy_csv_linear():
+    path3 = Path(__file__).parent / "../pkls/CY21.pkl"
+    cy = pd.read_pickle(path3, compression='gzip')
+    path4 = Path(__file__).parent / "../pkls/CY22.pkl"
+    cy4 = pd.read_pickle(path4, compression='gzip')
+    cy = pd.concat([cy, cy4], ignore_index=True, axis=0)
+    return cy
+
+
 @shared_task(name='tasks:add')
 def add(x: int, y: int):
     return x + y
@@ -45,7 +54,7 @@ def add(x: int, y: int):
 @shared_task(name='tasks:train_models_task')
 def train_models_task(db: str, yyyy: str, mm: str, dd: str):
     responses = []
-    cy = read_cy_csv()
+    cy = read_cy_csv_linear()
     # oa = read_oa_csv()
     timeseries = save_timeseries_to_db(db, yyyy, mm, dd)
     responses.append(timeseries)
