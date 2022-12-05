@@ -24,7 +24,6 @@ def cleancsv_order_hist(db: str, id_order_hist: str):
     
     return df_return
 
-
 def employee_speed(db: str):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
@@ -73,8 +72,8 @@ def employee_speed(db: str):
     totalseconds = orderquantity_df.groupby(['Employee'])['Seconds'].sum().reset_index(name ='Total Seconds')
 
     result1 = pd.merge(totalitems, totalseconds, on='Employee', how='right')
-    result1['Item/Second'] = result1['Total Items'] / result1['Total Seconds']
-    result1.sort_values('Item/Second', ignore_index=True, inplace=True)
+    result1['ItemPerSecond'] = result1['Total Items'] / result1['Total Seconds']
+    result1.sort_values('ItemPerSecond', ignore_index=True, inplace=True)
     results = pd.DataFrame(result1)
 
     results = results.to_dict(orient='records')
