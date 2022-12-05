@@ -15,8 +15,8 @@ def nps_score(db: str):
 
     df = pd.DataFrame(sentiments)
 
-    classification_code = {'Very Dissatisfied': 1,'Dissatisfied': 2,'Neutral' : 3,'Satisfied' : 4,'Very Satisfied' : 5}
-    df['NPS_Code'] = df['Classification'].map(classification_code)
+    # classification_code = {'Very Dissatisfied': 1,'Dissatisfied': 2,'Neutral' : 3,'Satisfied' : 4,'Very Satisfied' : 5}
+    # df['NPS_Code'] = df['Classification'].map(classification_code)
 
     def nps_bucket(x):
         if x > 3:
@@ -30,9 +30,9 @@ def nps_score(db: str):
         return bucket
 
 
-    df['NPS_Score'] = df['NPS_Code'].apply(nps_bucket)
+    df['NPS_Score'] = df['rating'].apply(nps_bucket)
 
-    grouped_df = df.groupby(['Date'])['NPS_Score'].apply(lambda x: (x.str.contains('promoter').sum() - x.str.contains('detractor').sum()) / 
+    grouped_df = df.groupby(['created_time'])['NPS_Score'].apply(lambda x: (x.str.contains('promoter').sum() - x.str.contains('detractor').sum()) / 
                     (x.str.contains('promoter').sum() + x.str.contains('passive').sum() + x.str.contains('detractor').sum())).reset_index()
 
     
