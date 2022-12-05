@@ -16,6 +16,7 @@ from models.employee_prod import cleancsv_order_hist, employee_speed
 from models.breakeven_point import breakeven_point
 from services.authentication import get_db_names, create_access_token, get_current_active_user, get_access_token, update_user_db
 from services.api_weather import get_weather
+from models.inflation import inflation_model
 
 from dbs.db_forecast_revenue import fetch_latest_forecast_revenues
 from dbs.db_revenue import fecth_by_range_revenue, fetch_revenue_in_db
@@ -401,7 +402,6 @@ def update_training_log(db: str):
 #-------------------------------------------#
 # General Products
 
-
 @router.get("/api/general_products")
 async def fetch_products(db: str):
     response = await fetch_general_products(db)
@@ -421,29 +421,6 @@ async def fetch_products_filtered(db: str, start_date: str, end_date: str):
 
 #-------------------------------------------#
 # Net Promoter Score (NPS)
-
-
-@router.get("/api/upload_sentiments")
-async def upload_sentiments(db: str, yyyy: str, mm: str, dd: str):
-    client = pymongo.MongoClient(
-        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
-    mydb = client[db]
-    col = mydb['Sentiments_Analysis']
-
-    documents = []
-
-    for document in documents.values():
-        col.insert_one(document)
-
-    # for res in results:
-    #     date = res['Date']
-    #     sentiments_body = res['Sentiments_Body']
-    #     classification = res['Classification']
-    #     if yyyy+'-'+mm+'-'+dd in date:
-    #         return 'True'
-    #     else:
-    #         return 'False'
-
 
 @router.get("/api/nps_score")
 def fetch_nps_score(db: str):
@@ -477,16 +454,14 @@ def fetch_employee_speed(db: str):
         404, f"Employee productivity is not available")
 
 #-------------------------------------------#
-# Breakeven Analysis
-
-
+# Breakeven Analysis 
 @router.get("/api/breakeven_analysis")
-def fetch_breakeven(db: str):
-    response = breakeven_point(db)
+def fetch_breakeven(db:str):
+    response =  breakeven_point(db)
     if response:
         return response
     raise HTTPException(
-        404, f"There is no records from {start_date} and {end_date}")
+        404, f"Break even point is not available")
 
 
 # Quantity Forecast table
@@ -519,3 +494,13 @@ async def get_by_range_heatmap(db: str, start_date: str, end_date: str):
         return response
     raise HTTPException(
         404, f"There is no records from {start_date} and {end_date}")
+
+#-------------------------------------------#
+# Inflation Forecast
+@router.get("/api/inflation")
+def fetch_inflation(db:str):
+    response =  inflation_model(db)
+    if response:
+        return response
+    raise HTTPException(
+        404, f"Inflation Forecast is not available")
