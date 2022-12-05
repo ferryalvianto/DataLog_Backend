@@ -1,17 +1,16 @@
 import motor.motor_asyncio
 from datetime import datetime
 
-client = motor.motor_asyncio.AsyncIOMotorClient(
-    'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
-
 
 # fetch all sentiments
 async def fetch_all_sentiments(db):
+    client = motor.motor_asyncio.AsyncIOMotorClient(
+        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
     sentiments = []
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
     cursor = collection.aggregate([
-        {'$group': {"_id": "$Classification", "Total_Count": {"$sum": 1}}}
+        {'$group': {"_id": "$rating", "Total_Count": {"$sum": 1}}}
     ])
     async for document in cursor:
         sentiments.append(document)
@@ -21,13 +20,17 @@ async def fetch_all_sentiments(db):
 
 
 async def fetch_by_range_sentiments(db, start_date, end_date):
+    client = motor.motor_asyncio.AsyncIOMotorClient(
+        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
     sentiments = []
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
-    cursor = collection.aggregate([{'$match': {'Date': {"$gte": start_date, "$lte":  end_date}}},
-                                   {'$group': {"_id": "$Classification",
-                                               "Total_Count": {"$sum": 1}}}
-                                   ])
+    cursor = collection.aggregate([
+        {'$match': {'created_time': {"$gte": start_date, "$lte":  end_date}}},
+        {'$group': {"_id": "$rating",
+                    "Total_Count": {"$sum": 1}}}
+    ])
+
     async for document in cursor:
         sentiments.append(document)
     return sentiments
@@ -36,6 +39,8 @@ async def fetch_by_range_sentiments(db, start_date, end_date):
 
 
 async def create_sentiments(db, rating, comment):
+    client = motor.motor_asyncio.AsyncIOMotorClient(
+        'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
     sentiments = []
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
