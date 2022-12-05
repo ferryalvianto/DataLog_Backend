@@ -10,7 +10,7 @@ from fastapi.encoders import jsonable_encoder
 
 from models.clean_csv import cleancsv
 from models.model import Sentiments, User, UserInDB, Token
-from models.ml_model_regression import load_saved_model_from_db, load_saved_model_from_db_with_category
+from models.ml_model_regression import load_saved_model_from_db, load_saved_model_from_db_with_category, load_saved_model_from_db_quantity_forecast_table
 from services.authentication import get_db_names, create_access_token, get_current_active_user, get_access_token, update_user_db
 from services.api_weather import get_weather
 
@@ -425,3 +425,14 @@ async def get_by_range_heatmap(db: str, start_date: str, end_date: str):
         return response
     raise HTTPException(
         404, f"There is no records from {start_date} and {end_date}")
+
+
+# Quantity Forecast table
+
+@router.get("/api/quantity_forecast_table")
+async def get_model_quantity_forecast_table(db: str):
+    response = load_saved_model_from_db_quantity_forecast_table(
+        db, get_weather())
+    if response:
+        return response
+    raise HTTPException(400, f"Something went wrong")
