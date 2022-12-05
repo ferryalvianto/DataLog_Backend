@@ -10,7 +10,7 @@ async def fetch_all_sentiments(db):
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
     cursor = collection.aggregate([
-        {'$group': {"_id": "$Classification", "Total_Count": {"$sum": 1}}}
+        {'$group': {"_id": "$rating", "Total_Count": {"$sum": 1}}}
     ])
     async for document in cursor:
         sentiments.append(document)
@@ -25,7 +25,7 @@ async def fetch_by_range_sentiments(db, start_date, end_date):
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
     cursor = collection.aggregate([{'$match': {'Date': {"$gte": start_date, "$lte":  end_date}}},
-                                   {'$group': {"_id": "$Classification",
+                                   {'$group': {"_id": "$rating",
                                                "Total_Count": {"$sum": 1}}}
                                    ])
     async for document in cursor:
