@@ -254,7 +254,7 @@ def get_weather_forecast():
 
 
 @router.get('/api/apriori')
-def apriori(db:str, date:str):
+def marketbasket(db:str, date:str):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
     col = mydb['df_sales']
@@ -281,7 +281,7 @@ def apriori(db:str, date:str):
     onehot = pd.DataFrame(onehot, columns = encoder.columns_)
 
     # Print onehot header.
-    onehot.head()
+    onehot=onehot.head()
 
     # Compute frequent itemsets using the Apriori algorithm
     frequent_itemsets = apriori(onehot, 
@@ -293,9 +293,9 @@ def apriori(db:str, date:str):
     rules['antecedents'] = rules['antecedents'].apply(lambda a: ','.join(list(a)))
     rules['consequents'] = rules['consequents'].apply(lambda a: ','.join(list(a)))
     support_table = rules.pivot(index='consequents', columns='antecedents',values='support')
-    sns.heatmap(support_table)
+    support_table.fillna(0, inplace=True)
 
-    support_table.to_dict(orient='records')
+    return support_table.to_dict(orient='records')
 
 @router.get("/api/model_regression_result")
 async def put_model(db: str):
