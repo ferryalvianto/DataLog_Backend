@@ -162,11 +162,22 @@ async def get_sentiment_by_range(db: str, start_date: str, end_date: str):
     raise HTTPException(
         404, f"There is no sentiments from {start_date} and {end_date}")
 
+
+#-------------------------------------------#
+# model api
+
+# @router.get("/api/model_regression")
+# async def put_model(db:str, yyyy:str, mm:str, dd:str):
+#     response = save_model_to_db(db, yyyy, mm, dd)
+#     if response:
+#         return response
+#     raise HTTPException(400, f"Something went wrong")
+
 # inserting sentiments
 
 
-@router.post("/api/insert_sentiments")
-async def post_todo(db: str, rating: int, comment: str):
+@router.get("/api/insert_sentiments")
+async def put_sentiment(db: str, rating: int, comment: str):
     response = await create_sentiments(db, rating, comment)
     if response:
         return response

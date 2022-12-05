@@ -1,4 +1,5 @@
 import motor.motor_asyncio
+from datetime import datetime
 
 client = motor.motor_asyncio.AsyncIOMotorClient(
     'mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net')
@@ -38,5 +39,7 @@ async def create_sentiments(db, rating, comment):
     sentiments = []
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
-    info = collection.insert_one({'rating': rating, 'comment': comment})
+
+    info = collection.insert_one(
+        {'rating': rating, 'comment': comment, 'created_time': datetime.today().strftime('%Y-%m-%d')})
     return rating
