@@ -417,11 +417,9 @@ async def upload_sentiments(db:str, yyyy:str, mm:str, dd:str):
 
     documents = []
 
-    
 
     for document in documents.values():
         col.insert_one(document)
-
 
     # for res in results:
     #     date = res['Date']
