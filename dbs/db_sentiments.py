@@ -2,7 +2,7 @@ import motor.motor_asyncio
 from datetime import datetime
 
 #fetch all sentiments
-async def fetch_all_sentiments():
+async def fetch_all_sentiments(db):
     client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
     database = client.DataLog
     collection = database.Sentiments_Analysis
@@ -20,6 +20,7 @@ async def fetch_all_sentiments():
 
 
 async def fetch_by_range_sentiments(db, start_date, end_date):
+    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
     sentiments = []
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']
@@ -35,6 +36,7 @@ async def fetch_by_range_sentiments(db, start_date, end_date):
 
 
 async def create_sentiments(db, rating, comment):
+    client = motor.motor_asyncio.AsyncIOMotorClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/test')
     sentiments = []
     mydb = client[db]
     collection = mydb['Sentiments_Analysis']

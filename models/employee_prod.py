@@ -24,7 +24,6 @@ def cleancsv_order_hist(db: str, id_order_hist: str):
     
     return df_return
 
-
 def employee_speed(db: str):
     client = pymongo.MongoClient('mongodb+srv://DataLog:DataLog@cluster0.jzr1zc7.mongodb.net/')
     mydb = client[db]
