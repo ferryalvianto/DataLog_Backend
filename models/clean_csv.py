@@ -391,7 +391,7 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
         elif (category == 'Dairy'):
             return 'Dairy'
 
-        # Health and Beauty
+        # Grocery
         elif (category == 'Grocery'):  # dips and produce
             if (('Hummus' in product_name) | ('Tofu' in product_name)):
                 return 'Dips and Produce'
@@ -434,107 +434,107 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
     # creating a function to assign coordinates
 
     def assign_x_coordinate(ht_cat):
-        if (ht_cat == 'Citruses'):
-            return 23.45
+        if (ht_cat == 'Citruses'):  # done
+            return 24
 
-        elif (ht_cat == 'Avocados'):
-            return 25
+        elif (ht_cat == 'Avocados'):  # done
+            return 28
 
-        elif (ht_cat == 'Apples'):
+        elif (ht_cat == 'Apples'):  # done
             return 27
 
-        elif (ht_cat == 'Yams and Potatoes'):
-            return 23.45
+        elif (ht_cat == 'Yams and Potatoes'):  # done
+            return 24
 
-        elif (ht_cat == 'Garlic and Onions'):
-            return 45
+        elif (ht_cat == 'Garlic and Onions'):  # done
+            return 27
 
-        elif (ht_cat == 'Bananas'):
-            return 1307
+        elif (ht_cat == 'Bananas'):  # done
+            return 37
 
-        elif (ht_cat == 'Produce'):
-            return 20
+        elif (ht_cat == 'Produce'):  # oks
+            return 18
 
-        elif (ht_cat == 'Coffee Bar'):
-            return 45
+        elif (ht_cat == 'Coffee Bar'):  # oks
+            return 40
 
-        elif (ht_cat == 'Breads'):
+        elif (ht_cat == 'Breads'):  # done
             return 26
 
-        elif (ht_cat == 'Hardbite'):
+        elif (ht_cat == 'Hardbite'):  # done
+            return 27
+
+        elif (ht_cat == 'Chocolates'):  # done
+            return 40
+
+        elif (ht_cat == 'Snack Bars'):  # done
             return 30
 
-        elif (ht_cat == 'Chocolates'):
-            return 45
-
-        elif (ht_cat == 'Snack Bars'):
-            return 30
-
-        elif (ht_cat == 'Chips'):
+        elif (ht_cat == 'Chips'):  # done
             return 23.45
 
-        elif (ht_cat == 'Health & Beauty'):
-            return 32
+        elif (ht_cat == 'Health & Beauty'):  # done
+            return 30
 
-        elif (ht_cat == 'Dairy'):
-            return 26
+        elif (ht_cat == 'Dairy'):  # done
+            return 27.5
 
-        elif (ht_cat == 'Dips and Produce'):
-            return 20
+        elif (ht_cat == 'Dips and Produce'):  # done
+            return 18
 
-        elif (ht_cat == 'Oils'):
-            return 26
-
-        elif (ht_cat == 'Broths'):
-            return 26
-
-        elif (ht_cat == 'Coffee and Teas'):
-            return 45.23
-
-        elif (ht_cat == 'Peanut Butters'):
+        elif (ht_cat == 'Oils'):  # done
             return 28
 
-        elif (ht_cat == 'Pasta'):
-            return 26
+        elif (ht_cat == 'Broths'):  # done
+            return 23.45
 
-        elif (ht_cat == 'Frozen meat and seafood'):
+        elif (ht_cat == 'Coffee and Teas'):  # done
             return 28
+
+        elif (ht_cat == 'Peanut Butters'):  # done
+            return 30
+
+        elif (ht_cat == 'Pasta'):  # done
+            return 27.5
+
+        elif (ht_cat == 'Frozen meat and seafood'):  # done
+            return 28.5
 
         elif (ht_cat == 'Vegan'):
             return 23.45
 
-        elif (ht_cat == 'Candies'):
-            return 43
+        elif (ht_cat == 'Candies'):  # done
+            return 40
 
-        elif (ht_cat == 'Local Items'):
-            return 23.45
+        elif (ht_cat == 'Local Items'):  # done
+            return 24
 
         elif (ht_cat == 'Deli and Cheese and Meals'):
-            return 50
+            return 45
         else:
-            return 0
+            return 30
 
     def assign_y_coordinate(ht_cat):
         if (ht_cat == 'Citruses'):
-            return 60
+            return 62
 
         elif (ht_cat == 'Avocados'):
-            return 60
+            return 62
 
         elif (ht_cat == 'Apples'):
-            return 60
+            return 62
 
         elif (ht_cat == 'Yams and Potatoes'):
-            return 58
+            return 60
 
         elif (ht_cat == 'Garlic and Onions'):
-            return 58
+            return 60
 
         elif (ht_cat == 'Bananas'):
-            return 50
+            return 57
 
         elif (ht_cat == 'Produce'):
-            return 60
+            return 63
 
         elif (ht_cat == 'Coffee Bar'):
             return 23.45
@@ -567,13 +567,13 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
             return 45
 
         elif (ht_cat == 'Broths'):
-            return 40
+            return 42
 
         elif (ht_cat == 'Coffee and Teas'):
-            return 55.23
+            return 50
 
         elif (ht_cat == 'Peanut Butters'):
-            return 45
+            return 50
 
         elif (ht_cat == 'Pasta'):
             return 45
@@ -593,7 +593,7 @@ def cleancsv(db: str, id_inventory: str, id_payment: str, year: str, month: str,
         elif (ht_cat == 'Deli and Cheese and Meals'):
             return 40
         else:
-            return 0
+            return 40
 
     df['x_coor'] = df.HT_Category.apply(lambda x: assign_x_coordinate(x))
     df['y_coor'] = df.HT_Category.apply(lambda x: assign_y_coordinate(x))
